@@ -13,7 +13,7 @@ export default async function AppointmentsPage() {
     ClientUseCases.getClients(),
     ServiceUseCases.getServices(),
     EmployeeUseCases.getEmployees(),
-    RoomUseCases.getRooms()
+    RoomUseCases.getRooms(),
   ]);
 
   const appointments = aptRes.success && aptRes.data ? aptRes.data : [];
@@ -23,20 +23,18 @@ export default async function AppointmentsPage() {
   const rooms = rmRes.success && rmRes.data ? rmRes.data : [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Appointments</h1>
-          <p className="mt-2 text-sm text-gray-500">Schedule and manage clinic appointments securely.</p>
-        </div>
+    <div className="animate-fade-in">
+      <div className="page-header">
+        <h1>Appointments</h1>
+        <p>Schedule and manage clinic appointments.</p>
       </div>
-      <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-2xl overflow-hidden">
-        <AppointmentList 
-          initialAppointments={appointments} 
-          clients={clients} 
-          services={services} 
-          employees={employees} 
-          rooms={rooms} 
+      <div className="card">
+        <AppointmentList
+          initialAppointments={appointments}
+          clients={clients}
+          services={services}
+          employees={employees}
+          rooms={rooms}
         />
       </div>
     </div>

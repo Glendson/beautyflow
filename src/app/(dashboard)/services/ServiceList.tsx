@@ -10,47 +10,66 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("Are you sure you want to remove this service?")) return;
     setLoadingId(id);
     const res = await deleteServiceAction(id);
-    if (res.success) setServices(prev => prev.filter(s => s.id !== id));
+    if (res.success) setServices((prev) => prev.filter((s) => s.id !== id));
     else alert("Failed to delete service");
     setLoadingId(null);
   };
 
   return (
     <div>
-      <div className="flex justify-end p-4 border-b border-gray-100 bg-gray-50/50">
-        <button onClick={() => setShowAdd(!showAdd)} className="inline-flex items-center justify-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 transition-all active:scale-95">
-          {showAdd ? "Cancel" : "+ Add Service"}
+      {/* Toolbar */}
+      <div className="card-header">
+        <p className="text-sm font-medium text-gray-500">
+          {services.length} {services.length === 1 ? "service" : "services"}
+        </p>
+        <button onClick={() => setShowAdd(!showAdd)} className="btn-brand">
+          {showAdd ? (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+              Cancel
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+              Add Service
+            </>
+          )}
         </button>
       </div>
 
+      {/* Add Form */}
       {showAdd && (
-        <div className="p-6 border-b border-gray-100 bg-pink-50/30">
-          <form action={async (formData) => {
+        <div className="animate-slide-down border-b border-gray-100 bg-gray-50/30 p-6">
+          <form
+            action={async (formData) => {
               const res = await createServiceAction(formData);
-              if (res.success && 'data' in res) {
+              if (res.success && "data" in res) {
                 setServices([...services, res.data as Service]);
                 setShowAdd(false);
               } else alert((res as any).error || "Failed");
-            }} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-end">
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
-              <input required name="name" type="text" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" placeholder="e.g. Laser Hair Removal" />
+            }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 items-end"
+          >
+            <div>
+              <label className="form-label">Service Name</label>
+              <input required name="name" type="text" className="form-input" placeholder="e.g. Laser Hair Removal" />
             </div>
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
-              <input required name="duration" type="number" min="5" step="5" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" placeholder="e.g. 45" />
+            <div>
+              <label className="form-label">Duration (minutes)</label>
+              <input required name="duration" type="number" min="5" step="5" className="form-input" placeholder="e.g. 45" />
             </div>
-            <div className="sm:col-span-1 flex items-center h-full pb-2">
-              <label className="flex items-center space-x-2">
-                <input name="requires_room" type="checkbox" value="true" className="rounded border-gray-300 text-pink-600 focus:ring-pink-500" />
+            <div className="flex items-center h-full pt-5">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input name="requires_room" type="checkbox" value="true" className="w-4 h-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500" />
                 <span className="text-sm font-medium text-gray-700">Requires Room</span>
               </label>
             </div>
-            <div className="sm:col-span-1 flex justify-end">
-              <button type="submit" className="w-full inline-flex justify-center flex-shrink-0 rounded-md border border-transparent bg-gray-900 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-gray-800 transition-colors">
+            <div className="flex justify-end">
+              <button type="submit" className="btn-brand w-full sm:w-auto">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                 Save
               </button>
             </div>
@@ -58,27 +77,41 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
         </div>
       )}
 
+      {/* Table / Empty */}
       {services.length === 0 ? (
-        <div className="p-12 text-center text-gray-500">No services found. Add your first service above!</div>
+        <div className="empty-state">
+          <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+          </svg>
+          <p>No services found. Add your first service above!</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="table-modern">
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requires Room</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th>Service Name</th>
+                <th>Duration</th>
+                <th>Room Required</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {services.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50 transition-colors group">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{s.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{s.duration} min</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{s.requires_room ? "Yes" : "No"}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => handleDelete(s.id)} disabled={loadingId === s.id} className="text-red-600 hover:text-red-900 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50">
+                <tr key={s.id} className="group">
+                  <td className="font-medium text-gray-900">{s.name}</td>
+                  <td>
+                    <span className="badge badge-violet">{s.duration} min</span>
+                  </td>
+                  <td>
+                    {s.requires_room ? (
+                      <span className="badge badge-pink">Required</span>
+                    ) : (
+                      <span className="badge badge-gray">No</span>
+                    )}
+                  </td>
+                  <td className="text-right">
+                    <button onClick={() => handleDelete(s.id)} disabled={loadingId === s.id} className="btn-danger-ghost">
                       {loadingId === s.id ? "Deleting..." : "Delete"}
                     </button>
                   </td>

@@ -8,14 +8,12 @@ export default async function ClientsPage() {
   const clients = result.success && result.data ? result.data : [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Clients</h1>
-          <p className="mt-2 text-sm text-gray-500">Manage your clinic's patient records and contact information.</p>
-        </div>
+    <div className="animate-fade-in">
+      <div className="page-header">
+        <h1>Clients</h1>
+        <p>Manage your clinic&apos;s patient records and contact information.</p>
       </div>
-      <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-2xl overflow-hidden">
+      <div className="card">
         <ClientList initialClients={clients} />
       </div>
     </div>

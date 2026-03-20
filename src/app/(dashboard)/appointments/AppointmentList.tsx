@@ -8,10 +8,25 @@ import { Employee } from "@/domain/employee/Employee";
 import { Room } from "@/domain/room/Room";
 import { createAppointmentAction, updateAppointmentStatusAction } from "./actions";
 
-export default function AppointmentList({ 
-  initialAppointments, clients, services, employees, rooms 
-}: { 
-  initialAppointments: Appointment[], clients: Client[], services: Service[], employees: Employee[], rooms: Room[] 
+const STATUS_BADGES: Record<string, string> = {
+  scheduled: "badge-blue",
+  completed: "badge-green",
+  canceled: "badge-red",
+  no_show: "badge-amber",
+};
+
+export default function AppointmentList({
+  initialAppointments,
+  clients,
+  services,
+  employees,
+  rooms,
+}: {
+  initialAppointments: Appointment[];
+  clients: Client[];
+  services: Service[];
+  employees: Employee[];
+  rooms: Room[];
 }) {
   const [appointments, setAppointments] = useState(initialAppointments);
   const [showAdd, setShowAdd] = useState(false);
@@ -19,81 +34,119 @@ export default function AppointmentList({
 
   const handleStatusChange = async (id: string, status: string) => {
     setLoadingId(id);
-    const res = await updateAppointmentStatusAction(id, status) as any;
+    const res = (await updateAppointmentStatusAction(id, status)) as any;
     if (res.success && res.data) {
-      setAppointments(prev => prev.map(a => a.id === id ? (res.data as Appointment) : a));
+      setAppointments((prev) =>
+        prev.map((a) => (a.id === id ? (res.data as Appointment) : a))
+      );
     } else {
       alert("Failed to update status");
     }
     setLoadingId(null);
   };
 
-  const getClientName = (id: string) => clients.find(c => c.id === id)?.name || "Unknown";
-  const getServiceName = (id: string) => services.find(s => s.id === id)?.name || "Unknown";
-  const getEmployeeName = (id: string) => employees.find(e => e.id === id)?.name || "Unknown";
-  
+  const getClientName = (id: string) =>
+    clients.find((c) => c.id === id)?.name || "Unknown";
+  const getServiceName = (id: string) =>
+    services.find((s) => s.id === id)?.name || "Unknown";
+  const getEmployeeName = (id: string) =>
+    employees.find((e) => e.id === id)?.name || "Unknown";
+
   return (
     <div>
-      <div className="flex justify-end p-4 border-b border-gray-100 bg-gray-50/50">
-        <button onClick={() => setShowAdd(!showAdd)} className="inline-flex items-center justify-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 transition-all active:scale-95">
-          {showAdd ? "Cancel" : "+ Schedule Appointment"}
+      {/* Toolbar */}
+      <div className="card-header">
+        <p className="text-sm font-medium text-gray-500">
+          {appointments.length}{" "}
+          {appointments.length === 1 ? "appointment" : "appointments"}
+        </p>
+        <button onClick={() => setShowAdd(!showAdd)} className="btn-brand">
+          {showAdd ? (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+              Cancel
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+              Schedule Appointment
+            </>
+          )}
         </button>
       </div>
 
+      {/* Add Form */}
       {showAdd && (
-        <div className="p-6 border-b border-gray-100 bg-pink-50/30">
-          <form action={async (formData) => {
-              const res = await createAppointmentAction(formData) as any;
+        <div className="animate-slide-down border-b border-gray-100 bg-gray-50/30 p-6">
+          <form
+            action={async (formData) => {
+              const res = (await createAppointmentAction(formData)) as any;
               if (res.success && res.data) {
-                setAppointments([...appointments, res.data as Appointment].sort((a,b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()));
+                setAppointments(
+                  [...appointments, res.data as Appointment].sort(
+                    (a, b) =>
+                      new Date(a.start_time).getTime() -
+                      new Date(b.start_time).getTime()
+                  )
+                );
                 setShowAdd(false);
               } else alert(res.error || "Failed");
-            }} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start">
-            
+            }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
-              <select required name="client_id" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm">
+              <label className="form-label">Client</label>
+              <select required name="client_id" className="form-select">
                 <option value="">Select a client...</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
-              <select required name="service_id" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm">
+              <label className="form-label">Service</label>
+              <select required name="service_id" className="form-select">
                 <option value="">Select a service...</option>
-                {services.map(s => <option key={s.id} value={s.id}>{s.name} ({s.duration}m)</option>)}
+                {services.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.duration}m)</option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Provider (Employee)</label>
-              <select required name="employee_id" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm">
+              <label className="form-label">Provider</label>
+              <select required name="employee_id" className="form-select">
                 <option value="">Select a provider...</option>
-                {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                {employees.map((e) => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-              <input required name="date" type="date" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" />
+              <label className="form-label">Date</label>
+              <input required name="date" type="date" className="form-input" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-              <input required name="time" type="time" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" />
+              <label className="form-label">Time</label>
+              <input required name="time" type="time" className="form-input" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Room (Optional)</label>
-              <select name="room_id" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm">
+              <label className="form-label">Room (Optional)</label>
+              <select name="room_id" className="form-select">
                 <option value="">No specific room</option>
-                {rooms.map(r => <option key={r.id} value={r.id}>{r.name} ({r.type})</option>)}
+                {rooms.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name} ({r.type})</option>
+                ))}
               </select>
             </div>
-            
-            <div className="sm:col-span-2 lg:col-span-3 flex justify-end mt-2">
-              <button type="submit" className="inline-flex justify-center rounded-md border border-transparent bg-gray-900 py-2 px-8 text-sm font-medium text-white shadow-sm hover:bg-gray-800 transition-colors">
+
+            <div className="sm:col-span-2 lg:col-span-3 flex justify-end pt-1">
+              <button type="submit" className="btn-brand">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                 Book Appointment
               </button>
             </div>
@@ -101,61 +154,67 @@ export default function AppointmentList({
         </div>
       )}
 
+      {/* Table / Empty */}
       {appointments.length === 0 ? (
-        <div className="p-12 text-center text-gray-500">No appointments scheduled. Book your first one above!</div>
+        <div className="empty-state">
+          <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+          </svg>
+          <p>No appointments scheduled. Book your first one above!</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="table-modern">
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Update Status</th>
+                <th>Date & Time</th>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Provider</th>
+                <th>Status</th>
+                <th className="text-right">Update</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {appointments.map((a) => {
                 const sTime = new Date(a.start_time);
                 const eTime = new Date(a.end_time);
                 const dateFmt = sTime.toLocaleDateString();
-                const timeFmt = `${sTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${eTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-                
+                const timeFmt = `${sTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – ${eTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+
                 return (
-                <tr key={a.id} className="hover:bg-gray-50 transition-colors group">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="font-medium">{dateFmt}</div>
-                    <div className="text-gray-500 text-xs mt-1">{timeFmt}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{getClientName(a.client_id)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{getServiceName(a.service_id)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{getEmployeeName(a.employee_id)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                      ${a.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
-                        a.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                        'bg-gray-100 text-gray-800'}`
-                    }>
-                      {a.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm font-medium">
-                    <select 
-                      disabled={loadingId === a.id}
-                      value={a.status}
-                      onChange={(e) => handleStatusChange(a.id, e.target.value)}
-                      className="rounded border-gray-300 text-xs shadow-sm focus:border-pink-500 focus:ring-pink-500 disabled:opacity-50"
-                    >
-                      <option value="scheduled">Scheduled</option>
-                      <option value="completed">Completed</option>
-                      <option value="canceled">Canceled</option>
-                      <option value="no_show">No Show</option>
-                    </select>
-                  </td>
-                </tr>
-              )})}
+                  <tr key={a.id} className="group">
+                    <td>
+                      <div className="font-medium text-gray-900">{dateFmt}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{timeFmt}</div>
+                    </td>
+                    <td className="font-medium text-gray-900">
+                      {getClientName(a.client_id)}
+                    </td>
+                    <td>{getServiceName(a.service_id)}</td>
+                    <td>{getEmployeeName(a.employee_id)}</td>
+                    <td>
+                      <span className={`badge ${STATUS_BADGES[a.status] || "badge-gray"} capitalize`}>
+                        {a.status.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="text-right">
+                      <select
+                        disabled={loadingId === a.id}
+                        value={a.status}
+                        onChange={(e) => handleStatusChange(a.id, e.target.value)}
+                        className="form-select text-xs py-1.5 px-2 w-auto inline-block disabled:opacity-50"
+                        style={{ minWidth: "120px" }}
+                      >
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="canceled">Canceled</option>
+                        <option value="no_show">No Show</option>
+                      </select>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
