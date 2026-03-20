@@ -6,111 +6,56 @@ import { createClient } from "@/infrastructure/supabase/server";
 export class ServiceRepository implements IServiceRepository {
   async findById(id: string, clinicId: string): Promise<Result<Service>> {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('id', id)
-      .eq('clinic_id', clinicId)
-      .single();
-
-    if (error || !data) {
-      return Result.fail(error?.message || "Service not found");
-    }
-
+    const { data, error } = await supabase.from('services').select('*').eq('id', id).eq('clinic_id', clinicId).single();
+    if (error || !data) return Result.fail(error?.message || "Service not found");
     return Result.ok(this.mapToEntity(data));
   }
 
   async findAll(clinicId: string): Promise<Result<Service[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('clinic_id', clinicId)
-      .order('name');
-
-    if (error) {
-      return Result.fail(error.message);
-    }
-
+    const { data, error } = await supabase.from('services').select('*').eq('clinic_id', clinicId).order('name');
+    if (error) return Result.fail(error.message);
     return Result.ok((data || []).map(this.mapToEntity));
   }
 
   async findByCategory(categoryId: string, clinicId: string): Promise<Result<Service[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('category_id', categoryId)
-      .eq('clinic_id', clinicId)
-      .order('name');
-
-    if (error) {
-      return Result.fail(error.message);
-    }
-
+    const { data, error } = await supabase.from('services').select('*').eq('category_id', categoryId).eq('clinic_id', clinicId).order('name');
+    if (error) return Result.fail(error.message);
     return Result.ok((data || []).map(this.mapToEntity));
   }
 
   async create(entity: Partial<Service> & { clinic_id: string }): Promise<Result<Service>> {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('services')
-      .insert({
-        clinic_id: entity.clinic_id,
-        category_id: entity.category_id,
-        name: entity.name!,
-        duration_minutes: entity.duration_minutes!,
-        price: entity.price!,
-        is_active: entity.is_active ?? true,
-      })
-      .select()
-      .single();
-
-    if (error || !data) {
-      return Result.fail(error?.message || "Failed to create service");
-    }
-
+    const { data, error } = await supabase.from('services').insert({
+      clinic_id: entity.clinic_id,
+      category_id: entity.category_id || null,
+      name: entity.name!,
+      duration: entity.duration!,
+      requires_room: entity.requires_room ?? false,
+      requires_specialist: entity.requires_specialist ?? false,
+    }).select().single();
+    if (error || !data) return Result.fail(error?.message || "Failed to create service");
     return Result.ok(this.mapToEntity(data));
   }
 
   async update(id: string, entity: Partial<Service>, clinicId: string): Promise<Result<Service>> {
     const supabase = await createClient();
-    
-    // RLS ensures only this clinic's data is updated, but explicitly adding clinic_id ensures safety
-    const { data, error } = await supabase
-      .from('services')
-      .update({
-        category_id: entity.category_id,
-        name: entity.name,
-        duration_minutes: entity.duration_minutes,
-        price: entity.price,
-        is_active: entity.is_active,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .eq('clinic_id', clinicId)
-      .select()
-      .single();
-
-    if (error || !data) {
-      return Result.fail(error?.message || "Failed to update service");
-    }
-
+    const { data, error } = await supabase.from('services').update({
+      category_id: entity.category_id,
+      name: entity.name,
+      duration: entity.duration,
+      requires_room: entity.requires_room,
+      requires_specialist: entity.requires_specialist,
+    }).eq('id', id).eq('clinic_id', clinicId).select().single();
+    if (error || !data) return Result.fail(error?.message || "Failed to update service");
     return Result.ok(this.mapToEntity(data));
   }
 
   async delete(id: string, clinicId: string): Promise<Result<void>> {
     const supabase = await createClient();
-    const { error } = await supabase
-      .from('services')
-      .delete()
-      .eq('id', id)
-      .eq('clinic_id', clinicId);
-
-    if (error) {
-      return Result.fail(error.message);
-    }
-
+    const { error } = await supabase.from('services').delete().eq('id', id).eq('clinic_id', clinicId);
+    if (error) return Result.fail(error.message);
     return Result.ok(undefined as any);
   }
 
@@ -120,11 +65,9 @@ export class ServiceRepository implements IServiceRepository {
       clinic_id: data.clinic_id,
       category_id: data.category_id,
       name: data.name,
-      duration_minutes: data.duration_minutes,
-      price: data.price,
-      is_active: data.is_active,
-      created_at: new Date(data.created_at),
-      updated_at: new Date(data.updated_at)
+      duration: data.duration,
+      requires_room: data.requires_room,
+      requires_specialist: data.requires_specialist
     };
   }
 }

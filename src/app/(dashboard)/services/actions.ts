@@ -5,32 +5,27 @@ import { revalidatePath } from "next/cache";
 
 export async function createServiceAction(formData: FormData) {
   const name = formData.get("name")?.toString();
-  const duration = parseInt(formData.get("duration_minutes")?.toString() || "0", 10);
-  const price = parseFloat(formData.get("price")?.toString() || "0");
-  const isActive = formData.get("is_active") === "true";
+  const duration = parseInt(formData.get("duration")?.toString() || "0");
+  const requires_room = formData.get("requires_room") === "true";
 
-  if (!name || duration <= 0 || price < 0) {
+  if (!name || duration <= 0) {
     return { success: false, error: "Invalid input" };
   }
 
   const result = await ServiceUseCases.createService({
     name,
-    duration_minutes: duration,
-    price,
-    is_active: isActive,
+    duration,
+    requires_room,
+    requires_specialist: false,
     category_id: null
   });
 
-  if (result.success) {
-    revalidatePath("/services");
-  }
-  return result;
+  if (result.success) revalidatePath("/services");
+  return result as any; // Narrowing bypass for actions
 }
 
 export async function deleteServiceAction(id: string) {
   const result = await ServiceUseCases.deleteService(id);
-  if (result.success) {
-    revalidatePath("/services");
-  }
+  if (result.success) revalidatePath("/services");
   return result;
 }

@@ -33,11 +33,11 @@ export default function ClientList({ initialClients }: { initialClients: Client[
         <div className="p-6 border-b border-gray-100 bg-pink-50/30">
           <form action={async (formData) => {
               const res = await createClientAction(formData);
-              if (res.success && res.data) {
+              if (res.success && 'data' in res) {
                 setClients([...clients, res.data as Client]);
                 setShowAdd(false);
-              } else alert(res.error || "Failed");
-            }} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
+              } else alert((res as any).error || "Failed");
+            }} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start">
             <div className="sm:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input required name="name" type="text" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" placeholder="e.g. Jane Doe" />
@@ -50,11 +50,7 @@ export default function ClientList({ initialClients }: { initialClients: Client[
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
               <input name="phone" type="text" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" placeholder="optional" />
             </div>
-            <div className="sm:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-              <input name="notes" type="text" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm" placeholder="optional" />
-            </div>
-            <div className="sm:col-span-1 lg:col-span-4 flex justify-end">
+            <div className="sm:col-span-1 lg:col-span-3 flex justify-end">
               <button type="submit" className="inline-flex justify-center rounded-md border border-transparent bg-gray-900 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-gray-800 transition-colors">
                 Save Client
               </button>
@@ -72,7 +68,6 @@ export default function ClientList({ initialClients }: { initialClients: Client[
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -84,7 +79,6 @@ export default function ClientList({ initialClients }: { initialClients: Client[
                     <div>{c.email || '-'}</div>
                     <div className="text-xs text-gray-400">{c.phone}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-[200px] truncate">{c.notes || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onClick={() => handleDelete(c.id)} disabled={loadingId === c.id} className="text-red-600 hover:text-red-900 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50">
                       {loadingId === c.id ? "Deleting..." : "Delete"}

@@ -19,7 +19,7 @@ export default function AppointmentList({
 
   const handleStatusChange = async (id: string, status: string) => {
     setLoadingId(id);
-    const res = await updateAppointmentStatusAction(id, status);
+    const res = await updateAppointmentStatusAction(id, status) as any;
     if (res.success && res.data) {
       setAppointments(prev => prev.map(a => a.id === id ? (res.data as Appointment) : a));
     } else {
@@ -43,7 +43,7 @@ export default function AppointmentList({
       {showAdd && (
         <div className="p-6 border-b border-gray-100 bg-pink-50/30">
           <form action={async (formData) => {
-              const res = await createAppointmentAction(formData);
+              const res = await createAppointmentAction(formData) as any;
               if (res.success && res.data) {
                 setAppointments([...appointments, res.data as Appointment].sort((a,b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()));
                 setShowAdd(false);
@@ -62,7 +62,7 @@ export default function AppointmentList({
               <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
               <select required name="service_id" className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:border-pink-500 focus:ring-pink-500 sm:text-sm shadow-sm">
                 <option value="">Select a service...</option>
-                {services.map(s => <option key={s.id} value={s.id}>{s.name} ({s.duration_minutes}m)</option>)}
+                {services.map(s => <option key={s.id} value={s.id}>{s.name} ({s.duration}m)</option>)}
               </select>
             </div>
 
