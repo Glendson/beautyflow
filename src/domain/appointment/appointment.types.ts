@@ -7,8 +7,8 @@ export interface AppointmentProps {
   roomId?: string;
   clientId: string;
   serviceId: string;
-  date: string; // ISO String
-  durationMinutes: number;
+  startTime: string; // ISO String
+  endTime: string;   // ISO String
   status: AppointmentStatus;
   notes?: string;
   createdAt?: string;

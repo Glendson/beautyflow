@@ -16,7 +16,6 @@ export class AuthUseCase {
 
     const clinicSlug = clinicName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(2, 6);
 
-    // @ts-expect-error RPC types not refreshed yet
     const { data: clinicId, error: rpcError } = await supabase.rpc('register_clinic', {
       clinic_name: clinicName,
       clinic_slug: clinicSlug,

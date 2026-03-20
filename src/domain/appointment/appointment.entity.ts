@@ -15,8 +15,8 @@ export class Appointment {
   public get clientId(): string { return this.props.clientId; }
   public get serviceId(): string { return this.props.serviceId; }
   public get roomId(): string | undefined { return this.props.roomId; }
-  public get date(): string { return this.props.date; }
-  public get durationMinutes(): number { return this.props.durationMinutes; }
+  public get startTime(): string { return this.props.startTime; }
+  public get endTime(): string { return this.props.endTime; }
   public get status(): AppointmentStatus { return this.props.status; }
   public get notes(): string | undefined { return this.props.notes; }
   public get createdAt(): string | undefined { return this.props.createdAt; }

@@ -22,6 +22,7 @@ export type Database = {
           employee_id: string | null
           end_time: string
           id: string
+          notes: string | null
           room_id: string | null
           service_id: string | null
           start_time: string
@@ -34,6 +35,7 @@ export type Database = {
           employee_id?: string | null
           end_time: string
           id?: string
+          notes?: string | null
           room_id?: string | null
           service_id?: string | null
           start_time: string
@@ -46,6 +48,7 @@ export type Database = {
           employee_id?: string | null
           end_time?: string
           id?: string
+          notes?: string | null
           room_id?: string | null
           service_id?: string | null
           start_time?: string
@@ -285,6 +288,7 @@ export type Database = {
           clinic_id: string | null
           duration: number
           id: string
+          is_active: boolean | null
           name: string
           requires_room: boolean | null
           requires_specialist: boolean | null
@@ -294,6 +298,7 @@ export type Database = {
           clinic_id?: string | null
           duration: number
           id?: string
+          is_active?: boolean | null
           name: string
           requires_room?: boolean | null
           requires_specialist?: boolean | null
@@ -303,6 +308,7 @@ export type Database = {
           clinic_id?: string | null
           duration?: number
           id?: string
+          is_active?: boolean | null
           name?: string
           requires_room?: boolean | null
           requires_specialist?: boolean | null
@@ -367,7 +373,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      register_clinic: {
+        Args: {
+          clinic_name: string
+          clinic_slug: string
+          first_name: string
+          last_name: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

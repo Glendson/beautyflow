@@ -1,0 +1,70 @@
+﻿Ôû▓ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.org/
+docs/messages/middleware-
+to-proxy
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecified: 
+(ÔÜá     The 
+"middle...leware-    
+to-proxy:String) [], R   
+ emoteException
+    + 
+FullyQualifiedErrorI    
+d : NativeCommandError
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.4s
+  Running TypeScript ...
+Failed to type check.
+
+./src/application/auth/Au
+thUseCase.ts:19:5
+Type error: Unused 
+'@ts-expect-error' 
+directive.
+
+  [90m17 |[0m     
+[36mconst[0m 
+clinicSlug = clinicName.t
+oLowerCase().replace([35
+m/[^a-z0-9]+/g[0m, 
+[32m'-'[0m) + 
+[32m'-'[0m + 
+[33mMath[0m.r...
+  [90m18 |[0m
+[31m[1m>[0m [90m19 
+|[0m     [90m// 
+@ts-expect-error RPC 
+types not refreshed 
+yet[0m
+  [90m   |[0m     
+[31m[1m^[0m
+  [90m20 |[0m     
+[36mconst[0m { data: 
+clinicId, error: 
+rpcError } = 
+[36mawait[0m supabase.r
+pc([32m'register_clinic'
+[0m, {
+  [90m21 |[0m       
+clinic_name: clinicName,
+  [90m22 |[0m       
+clinic_slug: clinicSlug,
+Next.js build worker 
+exited with code: 1 and 
+signal: null

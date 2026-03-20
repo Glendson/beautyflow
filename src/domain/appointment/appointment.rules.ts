@@ -9,15 +9,17 @@ export const validateAppointment = (props: AppointmentProps): Result<true> => {
   if (!props.employeeId) return Result.fail("employeeId is required");
   if (!props.clientId) return Result.fail("clientId is required");
   if (!props.serviceId) return Result.fail("serviceId is required");
-  if (!props.date) return Result.fail("date is required");
+  if (!props.startTime) return Result.fail("startTime is required");
+  if (!props.endTime) return Result.fail("endTime is required");
   
-  const appointmentDate = new Date(props.date);
-  if (isNaN(appointmentDate.getTime())) {
+  const start = new Date(props.startTime);
+  const end = new Date(props.endTime);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     return Result.fail("Invalid date format");
   }
 
-  if (props.durationMinutes <= 0) {
-    return Result.fail("Duration must be greater than zero");
+  if (end <= start) {
+    return Result.fail("End time must be after start time");
   }
 
   return Result.ok(true);

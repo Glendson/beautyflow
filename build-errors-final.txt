@@ -1,0 +1,65 @@
+﻿Ôû▓ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is deprecated. 
+Please use "proxy" 
+instead. Learn more: https:
+//nextjs.org/docs/messages/
+middleware-to-proxy
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified:     
+(ÔÜá The "middle...l    
+eware-to-proxy:Strin    g) 
+[], RemoteExcepti    on
+    + FullyQualifiedErro   
+ rId : NativeCommandE    
+rror
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 2.8s
+  Running TypeScript ...
+Failed to type check.
+
+./src/infrastructure/reposi
+tories/supabase/ServiceRepo
+sitory.ts:63:5
+Type error: Property 
+'is_active' is missing in 
+type '{ id: any; 
+clinic_id: any; 
+category_id: any; name: 
+any; duration: any; 
+requires_room: any; 
+requires_specialist: any; 
+}' but required in type 
+'Service'.
+
+  [90m61 |[0m
+  [90m62 |[0m   
+[36mprivate[0m 
+mapToEntity(data: any): 
+[33mService[0m {
+[31m[1m>[0m [90m63 
+|[0m     [36mreturn[0m {
+  [90m   |[0m     
+[31m[1m^[0m
+  [90m64 |[0m       id: 
+data.id,
+  [90m65 |[0m       
+clinic_id: data.clinic_id,
+  [90m66 |[0m       
+category_id: 
+data.category_id,
+Next.js build worker 
+exited with code: 1 and 
+signal: null

@@ -6,4 +6,5 @@ export interface Service {
   duration: number;
   requires_room: boolean | null;
   requires_specialist: boolean | null;
+  is_active: boolean;
 }

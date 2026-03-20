@@ -34,6 +34,7 @@ export class ServiceRepository implements IServiceRepository {
       duration: entity.duration!,
       requires_room: entity.requires_room ?? false,
       requires_specialist: entity.requires_specialist ?? false,
+      is_active: entity.is_active ?? true,
     }).select().single();
     if (error || !data) return Result.fail(error?.message || "Failed to create service");
     return Result.ok(this.mapToEntity(data));
@@ -47,6 +48,7 @@ export class ServiceRepository implements IServiceRepository {
       duration: entity.duration,
       requires_room: entity.requires_room,
       requires_specialist: entity.requires_specialist,
+      is_active: entity.is_active,
     }).eq('id', id).eq('clinic_id', clinicId).select().single();
     if (error || !data) return Result.fail(error?.message || "Failed to update service");
     return Result.ok(this.mapToEntity(data));
@@ -67,7 +69,8 @@ export class ServiceRepository implements IServiceRepository {
       name: data.name,
       duration: data.duration,
       requires_room: data.requires_room,
-      requires_specialist: data.requires_specialist
+      requires_specialist: data.requires_specialist,
+      is_active: data.is_active ?? true
     };
   }
 }

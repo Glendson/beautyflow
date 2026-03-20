@@ -17,7 +17,8 @@ export async function createServiceAction(formData: FormData) {
     duration,
     requires_room,
     requires_specialist: false,
-    category_id: null
+    category_id: null,
+    is_active: true
   });
 
   if (result.success) revalidatePath("/services");

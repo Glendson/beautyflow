@@ -1,0 +1,21 @@
+﻿Ôû▓ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 3.0s
+  Running TypeScript ...
+Failed to type check.
+
+./src/app/(dashboard)/services/actions.ts:15:54
+Type error: Argument of type '{ name: string; duration: number; requires_room: boolean; requires_specialist: false; category_id: null; }' is not assignable to parameter of type 'Omit<Service, "id" | "clinic_id" | "created_at" | "updated_at">'.
+  Property 'is_active' is missing in type '{ name: string; duration: number; requires_room: boolean; requires_specialist: false; category_id: null; }' but required in type 'Omit<Service, "id" | "clinic_id" | "created_at" | "updated_at">'.
+
+  [90m13 |[0m   }
+  [90m14 |[0m
+[31m[1m>[0m [90m15 |[0m   [36mconst[0m result = [36mawait[0m [33mServiceUseCases[0m.createService({
+  [90m   |[0m                                                      [31m[1m^[0m
+  [90m16 |[0m     name,
+  [90m17 |[0m     duration,
+  [90m18 |[0m     requires_room,
+Next.js build worker exited with code: 1 and signal: null

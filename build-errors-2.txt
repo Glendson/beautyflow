@@ -1,0 +1,194 @@
+﻿Ôû▓ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.or
+g/docs/messages/middlew
+are-to-proxy
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified:     (ÔÜá 
+The "middle...l    
+eware-to-proxy:Strin   
+ g) [], RemoteExcepti  
+  on
+    + 
+FullyQualifiedErro    
+rId : NativeCommandE   
+ rror
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 2.8s
+  Running TypeScript ...
+Failed to type check.
+
+./src/infrastructure/re
+positories/supabase/app
+ointment.repository.ts:
+13:10
+Type error: No 
+overload matches this 
+call.
+  Overload 1 of 2, 
+'(values: { 
+client_id?: string | 
+null | undefined; 
+clinic_id?: string | 
+null | undefined; 
+created_at?: string | 
+null | undefined; 
+employee_id?: string | 
+null | undefined; 
+end_time: string; ... 
+4 more ...; status?: 
+string | ... 1 more 
+... | undefined; }, 
+options?: { ...; } | 
+undefined): PostgrestFi
+lterBuilder<...>', 
+gave the following 
+error.
+    Argument of type 
+'{ clinic_id: string; 
+employee_id: string; 
+client_id: string; 
+service_id: string; 
+room_id: string | 
+undefined; date: 
+string; 
+duration_minutes: 
+number; status: 
+AppointmentStatus; 
+notes: string | 
+undefined; }[]' is not 
+assignable to 
+parameter of type '{ 
+client_id?: string | 
+null | undefined; 
+clinic_id?: string | 
+null | undefined; 
+created_at?: string | 
+null | undefined; 
+employee_id?: string | 
+null | undefined; 
+end_time: string; id?: 
+string | undefined; 
+room_id?: string | ... 
+1 more ... | 
+undefined; 
+service_id?: string | 
+... 1 more ... | 
+undefined; start_time: 
+stri...'.
+      Type '{ 
+clinic_id: string; 
+employee_id: string; 
+client_id: string; 
+service_id: string; 
+room_id: string | 
+undefined; date: 
+string; 
+duration_minutes: 
+number; status: 
+AppointmentStatus; 
+notes: string | 
+undefined; }[]' is 
+missing the following 
+properties from type 
+'{ client_id?: string 
+| null | undefined; 
+clinic_id?: string | 
+null | undefined; 
+created_at?: string | 
+null | undefined; 
+employee_id?: string | 
+null | undefined; 
+end_time: string; id?: 
+string | undefined; 
+room_id?: string | ... 
+1 more ... | 
+undefined; 
+service_id?: string | 
+... 1 more ... | 
+undefined; start_time: 
+stri...': end_time, 
+start_time
+  Overload 2 of 2, 
+'(values: { 
+client_id?: string | 
+null | undefined; 
+clinic_id?: string | 
+null | undefined; 
+created_at?: string | 
+null | undefined; 
+employee_id?: string | 
+null | undefined; 
+end_time: string; ... 
+4 more ...; status?: 
+string | ... 1 more 
+... | undefined; }[], 
+options?: { ...; } | 
+undefined): PostgrestFi
+lterBuilder<...>', 
+gave the following 
+error.
+    Object literal may 
+only specify known 
+properties, and 'date' 
+does not exist in type 
+'{ client_id?: string 
+| null | undefined; 
+clinic_id?: string | 
+null | undefined; 
+created_at?: string | 
+null | undefined; 
+employee_id?: string | 
+null | undefined; 
+end_time: string; id?: 
+string | undefined; 
+room_id?: string | ... 
+1 more ... | 
+undefined; 
+service_id?: string | 
+... 1 more ... | 
+undefined; start_time: 
+stri...'.
+
+  [90m11 |[0m       
+[36mconst[0m { data, 
+error } = 
+[36mawait[0m supabase
+  [90m12 |[0m        
+ .[36mfrom[0m([32m'a
+ppointments'[0m)
+[31m[1m>[0m [90m13 
+|[0m         
+.insert([{
+  [90m   |[0m        
+  [31m[1m^[0m
+  [90m14 |[0m        
+   clinic_id: 
+appointment.clinicId,
+  [90m15 |[0m        
+   employee_id: 
+appointment.employeeId,
+  [90m16 |[0m        
+   client_id: 
+appointment.clientId,
+Next.js build worker 
+exited with code: 1 
+and signal: null
