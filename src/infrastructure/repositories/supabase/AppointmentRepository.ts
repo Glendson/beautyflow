@@ -14,7 +14,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       .single();
 
     if (error || !data) return Result.fail(error?.message || "Appointment not found");
-    return Result.ok(this.mapToEntity(data));
+    return Result.ok(this.mapToEntity(data as DBAppointment));
   }
 
   async findAll(clinicId: string): Promise<Result<Appointment[]>> {
@@ -76,7 +76,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       .single();
 
     if (error || !data) return Result.fail(error?.message || "Failed to create appointment");
-    return Result.ok(this.mapToEntity(data));
+    return Result.ok(this.mapToEntity(data as DBAppointment));
   }
 
   async update(id: string, entity: Partial<Appointment>, clinicId: string): Promise<Result<Appointment>> {
@@ -99,7 +99,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       .single();
 
     if (error || !data) return Result.fail(error?.message || "Failed to update appointment");
-    return Result.ok(this.mapToEntity(data));
+    return Result.ok(this.mapToEntity(data as DBAppointment));
   }
 
   async delete(id: string, clinicId: string): Promise<Result<void>> {
