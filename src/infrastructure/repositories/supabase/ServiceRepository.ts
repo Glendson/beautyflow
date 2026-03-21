@@ -85,4 +85,4 @@ interface DBService {
   requires_specialist: boolean;
   is_active?: boolean | null;
 }
-}
+
