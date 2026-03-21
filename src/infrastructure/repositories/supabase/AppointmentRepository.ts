@@ -117,14 +117,14 @@ export class AppointmentRepository implements IAppointmentRepository {
   private mapToEntity(data: DBAppointment): Appointment {
     return {
       id: data.id,
-      clinic_id: data.clinic_id,
-      client_id: data.client_id,
-      service_id: data.service_id,
-      employee_id: data.employee_id,
+      clinic_id: data.clinic_id!,
+      client_id: data.client_id!,
+      service_id: data.service_id!,
+      employee_id: data.employee_id!,
       room_id: data.room_id,
       start_time: new Date(data.start_time),
       end_time: new Date(data.end_time),
-      status: data.status,
+      status: data.status as any,
       created_at: data.created_at ? new Date(data.created_at) : undefined,
       updated_at: data.updated_at ? new Date(data.updated_at) : undefined
     };
@@ -133,14 +133,14 @@ export class AppointmentRepository implements IAppointmentRepository {
 
 interface DBAppointment {
   id: string;
-  clinic_id: string;
-  client_id: string;
-  service_id: string;
-  employee_id: string;
+  clinic_id: string | null;
+  client_id: string | null;
+  service_id: string | null;
+  employee_id: string | null;
   room_id: string | null;
   start_time: string;
   end_time: string;
-  status: string;
+  status: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }
