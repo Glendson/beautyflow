@@ -8,10 +8,10 @@ import { vi } from 'vitest';
 // Mock Supabase Client
 export const mockSupabaseClient = () => ({
   auth: {
-    signUp: vi.fn(),
-    signInWithPassword: vi.fn(),
-    signOut: vi.fn(),
-    refreshSession: vi.fn(),
+    signUp: vi.fn(() => Promise.resolve({ data: { user: null }, error: null })),
+    signInWithPassword: vi.fn(() => Promise.resolve({ data: { user: null }, error: null })),
+    signOut: vi.fn(() => Promise.resolve({ error: null })),
+    refreshSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
     getUser: vi.fn(() => Promise.resolve({ data: { user: null }, error: null })),
     getSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
     onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
@@ -48,7 +48,7 @@ vi.mock('next/navigation', () => ({
 // Global test utilities
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export const createMockUser = (overrides?: Partial<unknown>) => ({
+export const createMockUser = (overrides?: { app_metadata?: Record<string, unknown>; [key: string]: unknown }) => ({
   id: 'test-user-id',
   email: 'test@example.com',
   user_metadata: {},
@@ -59,7 +59,7 @@ export const createMockUser = (overrides?: Partial<unknown>) => ({
   ...overrides,
 });
 
-export const createMockClinic = (overrides?: Partial<never>) => ({
+export const createMockClinic = (overrides?: Partial<Record<string, unknown>>) => ({
   id: 'test-clinic-id',
   name: 'Test Clinic',
   slug: 'test-clinic',
@@ -67,7 +67,7 @@ export const createMockClinic = (overrides?: Partial<never>) => ({
   ...overrides,
 });
 
-export const createMockAppointment = (overrides?: Partial<never>) => ({
+export const createMockAppointment = (overrides?: Partial<Record<string, unknown>>) => ({
   id: 'test-appointment-id',
   clinic_id: 'test-clinic-id',
   service_id: 'test-service-id',
@@ -81,7 +81,7 @@ export const createMockAppointment = (overrides?: Partial<never>) => ({
   ...overrides,
 });
 
-export const createMockService = (overrides?: Partial<never>) => ({
+export const createMockService = (overrides?: Partial<Record<string, unknown>>) => ({
   id: 'test-service-id',
   clinic_id: 'test-clinic-id',
   name: 'Test Service',
@@ -93,7 +93,7 @@ export const createMockService = (overrides?: Partial<never>) => ({
   ...overrides,
 });
 
-export const createMockEmployee = (overrides?: Partial<never>) => ({
+export const createMockEmployee = (overrides?: Partial<Record<string, unknown>>) => ({
   id: 'test-employee-id',
   clinic_id: 'test-clinic-id',
   name: 'Test Employee',
@@ -103,7 +103,7 @@ export const createMockEmployee = (overrides?: Partial<never>) => ({
   ...overrides,
 });
 
-export const createMockRoom = (overrides?: Partial<any>) => ({
+export const createMockRoom = (overrides?: Partial<Record<string, unknown>>) => ({
   id: 'test-room-id',
   clinic_id: 'test-clinic-id',
   name: 'Test Room',
@@ -113,7 +113,7 @@ export const createMockRoom = (overrides?: Partial<any>) => ({
   ...overrides,
 });
 
-export const createMockClient = (overrides?: Partial<any>) => ({
+export const createMockClient = (overrides?: Partial<Record<string, unknown>>) => ({
   id: 'test-client-id',
   clinic_id: 'test-clinic-id',
   name: 'Test Client',

@@ -26,7 +26,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       .order('start_time');
 
     if (error) return Result.fail(error.message);
-    return Result.ok((data || []).map(this.mapToEntity));
+    return Result.ok((data || []).map((d: DBAppointment) => this.mapToEntity(d)));
   }
 
   async findByDateRange(clinicId: string, start: Date, end: Date): Promise<Result<Appointment[]>> {
@@ -40,7 +40,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       .order('start_time');
 
     if (error) return Result.fail(error.message);
-    return Result.ok((data || []).map(this.mapToEntity));
+    return Result.ok((data || []).map((d: DBAppointment) => this.mapToEntity(d)));
   }
 
   async findByEmployeeAndDateRange(clinicId: string, employeeId: string, start: Date, end: Date): Promise<Result<Appointment[]>> {
@@ -55,7 +55,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       .order('start_time');
 
     if (error) return Result.fail(error.message);
-    return Result.ok((data || []).map(this.mapToEntity));
+    return Result.ok((data || []).map((d: DBAppointment) => this.mapToEntity(d)));
   }
 
   async create(entity: Partial<Appointment> & { clinic_id: string }): Promise<Result<Appointment>> {
@@ -111,10 +111,10 @@ export class AppointmentRepository implements IAppointmentRepository {
       .eq('clinic_id', clinicId);
 
     if (error) return Result.fail(error.message);
-    return Result.ok(undefined as any);
+    return Result.ok<void>(undefined);
   }
 
-  private mapToEntity(data: any): Appointment {
+  private mapToEntity(data: DBAppointment): Appointment {
     return {
       id: data.id,
       clinic_id: data.clinic_id,
@@ -125,8 +125,23 @@ export class AppointmentRepository implements IAppointmentRepository {
       start_time: new Date(data.start_time),
       end_time: new Date(data.end_time),
       status: data.status,
-      created_at: new Date(data.created_at),
-      updated_at: new Date(data.updated_at)
+      created_at: data.created_at ? new Date(data.created_at) : undefined,
+      updated_at: data.updated_at ? new Date(data.updated_at) : undefined
     };
   }
+}
+
+interface DBAppointment {
+  id: string;
+  clinic_id: string;
+  client_id: string;
+  service_id: string;
+  employee_id: string;
+  room_id: string | null;
+  start_time: string;
+  end_time: string;
+  status: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
 }

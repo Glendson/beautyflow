@@ -24,7 +24,7 @@ export class AppointmentValidator {
         }
       }
     }
-    return Result.ok(undefined as any);
+    return Result.ok<void>(undefined);
   }
 
   static validateWorkingHours(startTime: Date, endTime: Date): Result<void> {
@@ -36,6 +36,6 @@ export class AppointmentValidator {
     if (startHour < 9 || endHour > 18 || (endHour === 18 && endMinutes > 0)) {
       return Result.fail("Appointment must be within working hours (9:00 AM - 6:00 PM)");
     }
-    return Result.ok(undefined as any);
+    return Result.ok<void>(undefined);
   }
 }

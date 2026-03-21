@@ -13,6 +13,14 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Allow looser rules in test files and mocks to speed development
+  {
+    files: ["**/src/tests/**", "**/e2e/**", "**/src/tests/**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+    },
+  },
 ]);
 
 export default eslintConfig;

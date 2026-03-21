@@ -7,5 +7,5 @@ export type Result<T, E = string> =
 
 export const Result = {
   ok: <T>(data: T): Result<T> => ({ success: true, data }),
-  fail: <E>(error: E): Result<any, E> => ({ success: false, error }),
+  fail: <E>(error: E): Result<never, E> => ({ success: false, error }),
 };

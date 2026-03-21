@@ -8,21 +8,21 @@ export class ServiceRepository implements IServiceRepository {
     const supabase = await createClient();
     const { data, error } = await supabase.from('services').select('*').eq('id', id).eq('clinic_id', clinicId).single();
     if (error || !data) return Result.fail(error?.message || "Service not found");
-    return Result.ok(this.mapToEntity(data));
+    return Result.ok(this.mapToEntity(data as DBService));
   }
 
   async findAll(clinicId: string): Promise<Result<Service[]>> {
     const supabase = await createClient();
     const { data, error } = await supabase.from('services').select('*').eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
-    return Result.ok((data || []).map(this.mapToEntity));
+    return Result.ok(((data || []) as DBService[]).map(d => this.mapToEntity(d)));
   }
 
   async findByCategory(categoryId: string, clinicId: string): Promise<Result<Service[]>> {
     const supabase = await createClient();
     const { data, error } = await supabase.from('services').select('*').eq('category_id', categoryId).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
-    return Result.ok((data || []).map(this.mapToEntity));
+    return Result.ok(((data || []) as DBService[]).map(d => this.mapToEntity(d)));
   }
 
   async create(entity: Partial<Service> & { clinic_id: string }): Promise<Result<Service>> {
@@ -37,7 +37,7 @@ export class ServiceRepository implements IServiceRepository {
       is_active: entity.is_active ?? true,
     }).select().single();
     if (error || !data) return Result.fail(error?.message || "Failed to create service");
-    return Result.ok(this.mapToEntity(data));
+    return Result.ok(this.mapToEntity(data as DBService));
   }
 
   async update(id: string, entity: Partial<Service>, clinicId: string): Promise<Result<Service>> {
@@ -51,17 +51,17 @@ export class ServiceRepository implements IServiceRepository {
       is_active: entity.is_active,
     }).eq('id', id).eq('clinic_id', clinicId).select().single();
     if (error || !data) return Result.fail(error?.message || "Failed to update service");
-    return Result.ok(this.mapToEntity(data));
+    return Result.ok(this.mapToEntity(data as DBService));
   }
 
   async delete(id: string, clinicId: string): Promise<Result<void>> {
     const supabase = await createClient();
     const { error } = await supabase.from('services').delete().eq('id', id).eq('clinic_id', clinicId);
     if (error) return Result.fail(error.message);
-    return Result.ok(undefined as any);
+    return Result.ok<void>(undefined);
   }
 
-  private mapToEntity(data: any): Service {
+  private mapToEntity(data: DBService): Service {
     return {
       id: data.id,
       clinic_id: data.clinic_id,
@@ -73,4 +73,16 @@ export class ServiceRepository implements IServiceRepository {
       is_active: data.is_active ?? true
     };
   }
+}
+
+interface DBService {
+  id: string;
+  clinic_id: string;
+  category_id: string | null;
+  name: string;
+  duration: number;
+  requires_room: boolean;
+  requires_specialist: boolean;
+  is_active?: boolean | null;
+}
 }

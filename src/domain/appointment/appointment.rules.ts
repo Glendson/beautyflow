@@ -32,7 +32,19 @@ export const validateAppointment = (props: AppointmentProps): Result<true> => {
  * Validates appointment creation with extended checks
  * Includes status validation and duration checks
  */
-export const validateAppointmentCreation = (appointment: any): { valid: boolean; errors: string[] } => {
+type APIAppointment = {
+  clinic_id?: string | null;
+  service_id?: string | null;
+  employee_id?: string | null;
+  client_id?: string | null;
+  room_id?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  status?: AppointmentStatus | string | null;
+  [key: string]: unknown;
+};
+
+export const validateAppointmentCreation = (appointment: APIAppointment): { valid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
   // Required fields
@@ -63,7 +75,7 @@ export const validateAppointmentCreation = (appointment: any): { valid: boolean;
   }
 
   // Status validation
-  if (appointment.status && !VALID_STATUSES.includes(appointment.status)) {
+  if (appointment.status && !VALID_STATUSES.includes(appointment.status as AppointmentStatus)) {
     errors.push('Invalid status');
   }
 
@@ -87,10 +99,10 @@ export const validateStatusTransition = (
   newStatus: AppointmentStatus | string
 ): { valid: boolean; error?: string } => {
   // Validate both statuses exist
-  if (!VALID_STATUSES.includes(currentStatus as any)) {
+  if (!VALID_STATUSES.includes(currentStatus as AppointmentStatus)) {
     return { valid: false, error: `Invalid current status: ${currentStatus}` };
   }
-  if (!VALID_STATUSES.includes(newStatus as any)) {
+  if (!VALID_STATUSES.includes(newStatus as AppointmentStatus)) {
     return { valid: false, error: `Invalid target status: ${newStatus}` };
   }
 
@@ -111,7 +123,7 @@ export const validateStatusTransition = (
 
   // From scheduled, allow transition to completed, canceled, or no_show
   if (currentStatus === 'scheduled') {
-    if (['scheduled', 'completed', 'canceled', 'no_show'].includes(newStatus)) {
+    if ((['scheduled', 'completed', 'canceled', 'no_show'] as AppointmentStatus[]).includes(newStatus as AppointmentStatus)) {
       return { valid: true };
     }
   }
