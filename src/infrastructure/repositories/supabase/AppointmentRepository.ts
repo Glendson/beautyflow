@@ -1,5 +1,5 @@
 import { IAppointmentRepository } from "@/domain/appointment/IAppointmentRepository";
-import { Appointment } from "@/domain/appointment/Appointment";
+import { Appointment, AppointmentStatus } from "@/domain/appointment/Appointment";
 import { Result } from "@/lib/result";
 import { createClient } from "@/infrastructure/supabase/server";
 
@@ -124,7 +124,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       room_id: data.room_id,
       start_time: new Date(data.start_time),
       end_time: new Date(data.end_time),
-      status: data.status as any,
+      status: (data.status ?? 'scheduled') as AppointmentStatus,
       created_at: data.created_at ? new Date(data.created_at) : undefined,
       updated_at: data.updated_at ? new Date(data.updated_at) : undefined
     };
