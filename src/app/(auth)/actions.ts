@@ -3,6 +3,7 @@
 import { AuthUseCase } from "@/application/auth/AuthUseCase";
 import { redirect } from "next/navigation";
 import { Result } from "@/lib/result";
+import { getClinicId } from "@/lib/auth";
 
 export async function loginAction(formData: FormData): Promise<Result<void>> {
   const email = formData.get("email")?.toString();
@@ -15,6 +16,11 @@ export async function loginAction(formData: FormData): Promise<Result<void>> {
   const result = await AuthUseCase.signIn(email, password);
   
   if (result.success) {
+    // Verify clinic_id is available before redirecting
+    const clinicId = await getClinicId();
+    if (!clinicId) {
+      return Result.fail("User authenticated but clinic information not found. Please contact support.");
+    }
     redirect("/dashboard");
   }
 
@@ -35,6 +41,11 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
   const result = await AuthUseCase.signUp(email, password, clinicName, firstName, lastName ?? "");
 
   if (result.success) {
+    // Verify clinic_id is available before redirecting (double-check)
+    const clinicId = await getClinicId();
+    if (!clinicId) {
+      return Result.fail("Registration successful, but clinic information could not be retrieved. Please try logging in.");
+    }
     redirect("/dashboard");
   }
 
