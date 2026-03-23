@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen" style={{ background: "#f8fafc" }}>
       {/* Sidebar */}
-      <aside className="w-[272px] flex flex-col bg-white border-r border-gray-200/60" style={{ boxShadow: "1px 0 3px rgba(0,0,0,0.03)" }}>
+      <aside className="w-68 flex flex-col bg-white border-r border-gray-200/60" style={{ boxShadow: "1px 0 3px rgba(0,0,0,0.03)" }}>
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100/80">
           <div className="flex items-center gap-2.5">
@@ -93,7 +93,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group
                   ${isActive
-                    ? "text-pink-700 bg-gradient-to-r from-pink-50 to-violet-50 shadow-sm"
+                    ? "text-pink-700 bg-linear-to-r from-pink-50 to-violet-50 shadow-sm"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
               >
