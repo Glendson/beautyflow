@@ -1,18 +1,59 @@
 @import "tailwindcss";
 
-/* ─── Design Tokens ─── */
+/* ─── Design System Colors ─── */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --brand-pink: #ec4899;
-  --brand-violet: #8b5cf6;
-  --brand-gradient: linear-gradient(135deg, #ec4899, #8b5cf6);
-  --card-bg: #ffffff;
-  --card-border: rgba(226, 232, 240, 0.8);
-  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  --card-shadow-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  /* Primary Colors (Blue) */
+  --color-primary-dark: #1E40AF;
+  --color-primary: #3B82F6;
+  --color-primary-light: #DBEAFE;
+  
+  /* Accent (Green) */
+  --color-accent: #10B981;
+  --color-accent-light: #D1FAE5;
+  
+  /* Neutral/Background */
+  --color-bg: #F8FAFC;
+  --color-bg-secondary: #F1F5F9;
+  --color-text: #1E293B;
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  
+  /* Status Colors */
+  --color-danger: #EF4444;
+  --color-danger-light: #FEE2E2;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-success: #10B981;
+  --color-success-light: #D1FAE5;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-soft: 0 6px 20px rgba(16, 24, 40, 0.08);
+  
+  /* Layout */
   --sidebar-width: 272px;
   --header-height: 64px;
+  
+  /* Typography */
+  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
 }
 
 @theme inline {
