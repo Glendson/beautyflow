@@ -1,7 +1,6 @@
 "use server";
-import { ClientUseCases } from "@/application/client/ClientUseCases";
+import { ClientService } from "@/lib/services";
 import { revalidatePath } from "next/cache";
-import { getClinicId } from "@/lib/auth";
 
 export async function createClientAction(formData: FormData) {
   const name = formData.get("name")?.toString();
@@ -10,19 +9,14 @@ export async function createClientAction(formData: FormData) {
 
   if (!name) return { success: false, error: "Name is required" };
 
-  // Debug: verificar se clinic_id está sendo encontrado
-  const clinicId = await getClinicId();
-  console.log("🔍 [createClientAction] clinicId:", clinicId);
-
-  const result = await ClientUseCases.createClient({ name, email, phone });
-  console.log("🔍 [createClientAction] result:", JSON.stringify(result));
+  const result = await ClientService.create({ name, email, phone });
   
   if (result.success) revalidatePath("/clients");
-  return result as any;
+  return result;
 }
 
 export async function deleteClientAction(id: string) {
-  const result = await ClientUseCases.deleteClient(id);
+  const result = await ClientService.delete(id);
   if (result.success) revalidatePath("/clients");
   return result;
 }

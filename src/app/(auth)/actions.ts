@@ -1,9 +1,25 @@
 "use server";
 
 import { AuthUseCase } from "@/application/auth/AuthUseCase";
+import { ClinicUseCases } from "@/application/clinic/ClinicUseCases";
+import { AppointmentUseCases } from "@/application/appointment/AppointmentUseCases";
+import { ClientUseCases } from "@/application/client/ClientUseCases";
+import { ServiceUseCases } from "@/application/service/ServiceUseCases";
+import { EmployeeUseCases } from "@/application/employee/EmployeeUseCases";
+import { RoomUseCases } from "@/application/room/RoomUseCases";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { Result } from "@/lib/result";
 import { getClinicId } from "@/lib/auth";
+import { Clinic } from "@/domain/clinic/Clinic";
+import { Appointment } from "@/domain/appointment/Appointment";
+import { Client } from "@/domain/client/Client";
+import { Service } from "@/domain/service/Service";
+import { Employee } from "@/domain/employee/Employee";
+import { Room } from "@/domain/room/Room";
+import { PaginatedResult } from "@/lib/pagination";
+
+// ============ AUTH ACTIONS ============
 
 export async function loginAction(formData: FormData): Promise<Result<void>> {
   const email = formData.get("email")?.toString();
@@ -19,8 +35,6 @@ export async function loginAction(formData: FormData): Promise<Result<void>> {
   console.log("🔐 [LOGIN] AuthUseCase result:", result.success ? "✅ SUCCESS" : "❌ FAILED");
   
   if (result.success) {
-    // Verify clinic_id is available before redirecting
-    console.log("🔐 [LOGIN] Getting clinic ID...");
     const clinicId = await getClinicId();
     
     if (!clinicId) {
@@ -31,9 +45,7 @@ export async function loginAction(formData: FormData): Promise<Result<void>> {
     console.log("✅ [LOGIN] Clinic ID found:", clinicId);
     console.log("🔐 [LOGIN] Redirecting to /dashboard...");
     
-    // Add delay to ensure JWT is fully propagated through all systems
     await new Promise(resolve => setTimeout(resolve, 800));
-    
     redirect("/dashboard");
   }
 
@@ -58,7 +70,6 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
   console.log("🔐 [SIGNUP] AuthUseCase result:", result.success ? "✅ SUCCESS" : "❌ FAILED");
 
   if (result.success) {
-    // Verify clinic_id is available before redirecting (with retry logic)
     console.log("🔐 [SIGNUP] Getting clinic ID...");
     const clinicId = await getClinicId();
     
@@ -70,9 +81,7 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
     console.log("✅ [SIGNUP] Clinic ID found:", clinicId);
     console.log("🔐 [SIGNUP] Redirecting to /dashboard...");
     
-    // Add delay to ensure JWT is fully propagated through all systems
     await new Promise(resolve => setTimeout(resolve, 800));
-    
     redirect("/dashboard");
   }
 
@@ -83,4 +92,283 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
 export async function logoutAction() {
   await AuthUseCase.signOut();
   redirect("/login");
+}
+
+// ============ CLINIC ACTIONS ============
+
+export async function getClinicAction(): Promise<Result<Clinic>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return ClinicUseCases.getClinic();
+}
+
+export async function updateClinicAction(data: Partial<Clinic>): Promise<Result<Clinic>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return ClinicUseCases.updateClinic(data);
+}
+
+// ============ APPOINTMENT ACTIONS ============
+
+export async function listAppointmentsAction(
+  page: number = 1,
+  pageSize: number = 10,
+  filters?: { status?: string; clientId?: string; employeeId?: string; search?: string }
+): Promise<Result<PaginatedResult<Appointment>>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return AppointmentUseCases.getAppointmentsPaginated(page, pageSize, filters);
+}
+
+export async function createAppointmentAction(data: {
+  client_id: string;
+  service_id: string;
+  employee_id: string;
+  room_id: string | null;
+  start_time: Date;
+  end_time: Date;
+}): Promise<Result<Appointment>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await AppointmentUseCases.createAppointment(data);
+  if (result.success) {
+    revalidatePath("/appointments");
+  }
+  return result;
+}
+
+export async function updateAppointmentStatusAction(
+  id: string,
+  status: 'scheduled' | 'completed' | 'canceled' | 'no_show'
+): Promise<Result<Appointment>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await AppointmentUseCases.updateAppointmentStatus(id, status);
+  if (result.success) {
+    revalidatePath("/appointments");
+  }
+  return result;
+}
+
+export async function deleteAppointmentAction(id: string): Promise<Result<void>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await AppointmentUseCases.deleteAppointment(id);
+  if (result.success) {
+    revalidatePath("/appointments");
+  }
+  return result;
+}
+
+// ============ CLIENT ACTIONS ============
+
+export async function listClientsAction(
+  page: number = 1,
+  pageSize: number = 10,
+  filters?: { search?: string }
+): Promise<Result<PaginatedResult<Client>>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return ClientUseCases.getClientsPaginated(page, pageSize, filters);
+}
+
+export async function getClientAction(id: string): Promise<Result<Client>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return ClientUseCases.getClientById(id);
+}
+
+export async function createClientAction(data: Omit<Client, "id" | "clinic_id" | "created_at" | "updated_at">): Promise<Result<Client>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await ClientUseCases.createClient(data);
+  if (result.success) {
+    revalidatePath("/clients");
+  }
+  return result;
+}
+
+export async function updateClientAction(id: string, data: Partial<Client>): Promise<Result<Client>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await ClientUseCases.updateClient(id, data);
+  if (result.success) {
+    revalidatePath("/clients");
+  }
+  return result;
+}
+
+export async function deleteClientAction(id: string): Promise<Result<void>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await ClientUseCases.deleteClient(id);
+  if (result.success) {
+    revalidatePath("/clients");
+  }
+  return result;
+}
+
+// ============ SERVICE ACTIONS ============
+
+export async function listServicesAction(
+  page: number = 1,
+  pageSize: number = 10,
+  filters?: { search?: string; categoryId?: string; isActive?: boolean }
+): Promise<Result<PaginatedResult<Service>>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return ServiceUseCases.getServicesPaginated(page, pageSize, filters);
+}
+
+export async function getServiceAction(id: string): Promise<Result<Service>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return ServiceUseCases.getServiceById(id);
+}
+
+export async function createServiceAction(data: Omit<Service, "id" | "clinic_id" | "created_at" | "updated_at">): Promise<Result<Service>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await ServiceUseCases.createService(data);
+  if (result.success) {
+    revalidatePath("/services");
+  }
+  return result;
+}
+
+export async function updateServiceAction(id: string, data: Partial<Service>): Promise<Result<Service>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await ServiceUseCases.updateService(id, data);
+  if (result.success) {
+    revalidatePath("/services");
+  }
+  return result;
+}
+
+export async function deleteServiceAction(id: string): Promise<Result<void>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await ServiceUseCases.deleteService(id);
+  if (result.success) {
+    revalidatePath("/services");
+  }
+  return result;
+}
+
+// ============ EMPLOYEE ACTIONS ============
+
+export async function listEmployeesAction(
+  page: number = 1,
+  pageSize: number = 10,
+  filters?: { search?: string }
+): Promise<Result<PaginatedResult<Employee>>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return EmployeeUseCases.getEmployeesPaginated(page, pageSize, filters);
+}
+
+export async function getEmployeeAction(id: string): Promise<Result<Employee>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return EmployeeUseCases.getEmployeeById(id);
+}
+
+export async function createEmployeeAction(data: { name: string }, serviceIds?: string[]): Promise<Result<Employee>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await EmployeeUseCases.createEmployee(data, serviceIds);
+  if (result.success) {
+    revalidatePath("/employees");
+  }
+  return result;
+}
+
+export async function updateEmployeeAction(id: string, data: Partial<Employee>, serviceIds?: string[]): Promise<Result<Employee>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await EmployeeUseCases.updateEmployee(id, data, serviceIds);
+  if (result.success) {
+    revalidatePath("/employees");
+  }
+  return result;
+}
+
+export async function deleteEmployeeAction(id: string): Promise<Result<void>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await EmployeeUseCases.deleteEmployee(id);
+  if (result.success) {
+    revalidatePath("/employees");
+  }
+  return result;
+}
+
+export async function getEmployeeServicesAction(employeeId: string): Promise<Result<string[]>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return EmployeeUseCases.getEmployeeServices(employeeId);
+}
+
+// ============ ROOM ACTIONS ============
+
+export async function listRoomsAction(
+  page: number = 1,
+  pageSize: number = 10,
+  filters?: { search?: string; type?: 'room' | 'station' }
+): Promise<Result<PaginatedResult<Room>>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return RoomUseCases.getRoomsPaginated(page, pageSize, filters);
+}
+
+export async function getRoomAction(id: string): Promise<Result<Room>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+  return RoomUseCases.getRoomById(id);
+}
+
+export async function createRoomAction(data: Omit<Room, "id" | "clinic_id" | "created_at" | "updated_at">): Promise<Result<Room>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await RoomUseCases.createRoom(data);
+  if (result.success) {
+    revalidatePath("/rooms");
+  }
+  return result;
+}
+
+export async function updateRoomAction(id: string, data: Partial<Room>): Promise<Result<Room>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await RoomUseCases.updateRoom(id, data);
+  if (result.success) {
+    revalidatePath("/rooms");
+  }
+  return result;
+}
+
+export async function deleteRoomAction(id: string): Promise<Result<void>> {
+  const clinicId = await getClinicId();
+  if (!clinicId) return Result.fail("Unauthorized");
+
+  const result = await RoomUseCases.deleteRoom(id);
+  if (result.success) {
+    revalidatePath("/rooms");
+  }
+  return result;
 }

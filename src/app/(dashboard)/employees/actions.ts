@@ -1,25 +1,29 @@
 "use server";
-import { EmployeeUseCases } from "@/application/employee/EmployeeUseCases";
+import { EmployeeService } from "@/lib/services";
 import { revalidatePath } from "next/cache";
 
 export async function createEmployeeAction(formData: FormData) {
   const name = formData.get("name")?.toString();
+  const email = formData.get("email")?.toString() || "";
+  const phone = formData.get("phone")?.toString();
   const serviceIdsRaw = formData.get("service_ids")?.toString();
 
-  if (!name) return { success: false, error: "Invalid input" };
+  if (!name || !email) return { success: false, error: "Name and email are required" };
+  
   const serviceIds = serviceIdsRaw ? serviceIdsRaw.split(",") : [];
 
-  const result = await EmployeeUseCases.createEmployee(
-    { name },
-    serviceIds.length > 0 ? serviceIds : undefined
-  );
+  const result = await EmployeeService.create({ name, email, phone });
+  
+  if (result.success && serviceIds.length > 0) {
+    await EmployeeService.assignServices(result.data!.id, serviceIds);
+  }
 
   if (result.success) revalidatePath("/employees");
-  return result as any;
+  return result;
 }
 
 export async function deleteEmployeeAction(id: string) {
-  const result = await EmployeeUseCases.deleteEmployee(id);
+  const result = await EmployeeService.delete(id);
   if (result.success) revalidatePath("/employees");
   return result;
 }

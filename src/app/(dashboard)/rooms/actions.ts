@@ -1,5 +1,5 @@
 "use server";
-import { RoomUseCases } from "@/application/room/RoomUseCases";
+import { RoomService } from "@/lib/services";
 import { revalidatePath } from "next/cache";
 
 export async function createRoomAction(formData: FormData) {
@@ -10,13 +10,13 @@ export async function createRoomAction(formData: FormData) {
     return { success: false, error: "Invalid input" };
   }
 
-  const result = await RoomUseCases.createRoom({ name, type });
+  const result = await RoomService.create({ name, type });
   if (result.success) revalidatePath("/rooms");
-  return result as any;
+  return result;
 }
 
 export async function deleteRoomAction(id: string) {
-  const result = await RoomUseCases.deleteRoom(id);
+  const result = await RoomService.delete(id);
   if (result.success) revalidatePath("/rooms");
   return result;
 }

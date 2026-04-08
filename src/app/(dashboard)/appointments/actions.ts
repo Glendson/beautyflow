@@ -1,7 +1,6 @@
 "use server";
 
-import { AppointmentUseCases } from "@/application/appointment/AppointmentUseCases";
-import { ServiceUseCases } from "@/application/service/ServiceUseCases";
+import { AppointmentService, ServiceService } from "@/lib/services";
 import { revalidatePath } from "next/cache";
 
 export async function createAppointmentAction(formData: FormData) {
@@ -20,7 +19,7 @@ export async function createAppointmentAction(formData: FormData) {
   const start_time = new Date(`${dateStr}T${timeStr}:00`);
 
   // Get service duration
-  const serviceRes = await ServiceUseCases.getServiceById(service_id);
+  const serviceRes = await ServiceService.getById(service_id);
   if (!serviceRes.success || !serviceRes.data) {
     return { success: false, error: "Service not found" };
   }
@@ -28,7 +27,7 @@ export async function createAppointmentAction(formData: FormData) {
   const durationMins = serviceRes.data.duration;
   const end_time = new Date(start_time.getTime() + durationMins * 60000);
 
-  const result = await AppointmentUseCases.createAppointment({
+  const result = await AppointmentService.create({
     client_id,
     service_id,
     employee_id,
@@ -45,7 +44,7 @@ export async function createAppointmentAction(formData: FormData) {
 }
 
 export async function updateAppointmentStatusAction(id: string, status: string) {
-  const result = await AppointmentUseCases.updateAppointmentStatus(id, status as any);
+  const result = await AppointmentService.updateStatus(id, status as "scheduled" | "completed" | "canceled" | "no_show");
   if (result.success) {
     revalidatePath("/appointments");
     revalidatePath("/dashboard");
