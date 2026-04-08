@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
       {/* Hero Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 stagger-children">
-        <div className="relative overflow-hidden rounded-2xl p-6 text-white" style={{ background: "linear-gradient(135deg, #ec4899, #a855f7)" }}>
+        <div className="relative overflow-hidden rounded-2xl p-6 text-white bg-linear-to-br from-accent to-accent-dark">
           <div className="relative z-10">
             <p className="text-sm font-medium text-white/80">Today&apos;s Appointments</p>
             <p className="mt-2 text-4xl font-bold">{todaysAppointments.length}</p>
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
             <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
           </svg>
         </div>
-        <div className="relative overflow-hidden rounded-2xl p-6 text-white" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+        <div className="relative overflow-hidden rounded-2xl p-6 text-white bg-linear-to-br from-primary to-primary-dark">
           <div className="relative z-10">
             <p className="text-sm font-medium text-white/80">Upcoming Appointments</p>
             <p className="mt-2 text-4xl font-bold">{upcomingAppointments.length}</p>
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
             </svg>
           }
-          color="#ec4899"
+          colorClass="accent"
         />
         <MetricCard
           title="Active Services"
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
             </svg>
           }
-          color="#8b5cf6"
+          colorClass="primary"
         />
         <MetricCard
           title="Staff Members"
@@ -106,13 +106,14 @@ export default async function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
             </svg>
           }
-          color="#6366f1"
+          colorClass="danger"
         />
+      </div>
       </div>
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-4">Quick Actions</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 stagger-children">
           <QuickAction href="/appointments" label="Schedule Appointment" icon={
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -140,16 +141,24 @@ export default async function DashboardPage() {
   );
 }
 
-function MetricCard({ title, value, href, icon, color }: { title: string; value: number; href: string; icon: React.ReactNode; color: string }) {
+function MetricCard({ title, value, href, icon, colorClass }: { title: string; value: number; href: string; icon: React.ReactNode; colorClass: string }) {
+  const colorMap = {
+    accent: "from-accent to-accent-dark text-accent",
+    primary: "from-primary to-primary-dark text-primary",
+    danger: "from-danger to-danger-dark text-danger"
+  };
+
+  const bgClass = colorMap[colorClass as keyof typeof colorMap] || colorMap.primary;
+
   return (
     <Link href={href} className="metric-card block group">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${color}10`, color }}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-opacity-10 ${bgClass.split(' ')[2]}`} style={{ backgroundColor: `var(--color-${colorClass})`}}>
           {icon}
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-0.5">{value}</p>
+          <p className="text-sm font-medium text-neutral-600">{title}</p>
+          <p className="text-2xl font-bold text-neutral-900 mt-0.5">{value}</p>
         </div>
       </div>
     </Link>
@@ -160,11 +169,11 @@ function QuickAction({ href, label, icon }: { href: string; label: string; icon:
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200/60 bg-white text-sm font-medium text-gray-700 hover:border-pink-200 hover:bg-pink-50/30 hover:text-pink-700 transition-all duration-150 group"
+      className="flex items-center gap-3 px-4 py-3 rounded-xl border border-neutral-200/60 bg-white text-sm font-medium text-neutral-700 hover:border-accent-light hover:bg-accent-light/20 hover:text-accent transition-all duration-150 group"
     >
-      <span className="text-gray-400 group-hover:text-pink-500 transition-colors">{icon}</span>
+      <span className="text-neutral-500 group-hover:text-accent transition-colors">{icon}</span>
       {label}
-      <svg className="w-4 h-4 ml-auto text-gray-300 group-hover:text-pink-400 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <svg className="w-4 h-4 ml-auto text-neutral-300 group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
       </svg>
     </Link>
