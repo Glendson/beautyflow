@@ -85,12 +85,95 @@ src/
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
+
 4. Run the development server:
-   ```bash
+```bash
    npm run dev
-   ```
+```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+---
+
+## 📦 Database Setup & Migrations
+
+This project uses **Supabase Migrations** to manage database schema changes. Never execute SQL directly in the Supabase Dashboard—always use migrations.
+
+### Initial Setup
+
+The database schema is already set up with 6 migrations. To pull the current remote schema locally:
+
+```bash
+npm run db:push
+
+---
+
+## 🧪 Testing
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+---
+
+## 📦 Database Setup & Migrations
+
+This project uses **Supabase Migrations** to manage database schema changes. Never execute SQL directly in the Supabase Dashboard—always use migrations.
+
+### Initial Setup
+
+The database schema is already set up with 6 migrations. To pull the current remote schema locally:
+
+```bash
+npm run db:push
+```
+
+### Database Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run db:push` | Apply pending migrations to the database |
+| `npm run db:pull` | Pull the remote database schema and generate a new migration |
+| `npm run db:reset` | Reset the local database and rerun all migrations |
+| `npm run db:types` | Generate TypeScript types from the database schema |
+| `npm run seed` | Seed test data using the admin seed script |
+
+### Creating a New Migration
+
+1. Create a new SQL file in `/supabase/migrations/` with this naming pattern:
+   ```
+   YYYYMMDDHHMMSS_descriptive_name.sql
+   ```
+   Example: `20260408120000_add_billing_table.sql`
+
+2. Write your migration SQL (use `docs/MIGRATION_GUIDE.md` as reference).
+
+3. Test locally:
+   ```bash
+   npm run db:push --dry-run
+   ```
+
+4. If valid, apply:
+   ```bash
+   npm run db:push
+   ```
+
+5. Generate types:
+   ```bash
+   npm run db:types
+   ```
+
+6. Commit:
+   ```bash
+   git add supabase/migrations/YYYYMMDDHHMMSS_*.sql
+   git commit -m "chore: add [entity] table migration"
+   ```
+
+### Multi-Tenancy & RLS
+
+Every new table **must** have:
+1. A `clinic_id` column (or inherit via foreign key)
+2. RLS enabled
+3. A policy isolating by `clinic_id`
+
+For detailed migration patterns and best practices, see [docs/MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md).
 
 ---
 
