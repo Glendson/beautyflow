@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signupAction } from "../actions";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
@@ -27,65 +28,122 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          Register your clinic
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-pink-600 hover:text-pink-500">
-            Sign in
-          </Link>
-        </p>
+    <div className="min-h-screen flex">
+      {/* Left Side - Gradient */}
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-emerald-600 via-emerald-500 to-blue-600 flex-col justify-center px-12 text-white">
+        <div>
+          <h1 className="text-5xl font-bold mb-6">Comece agora!</h1>
+          <p className="text-xl text-emerald-100 mb-8 leading-relaxed">
+            Junte-se a centenas de clínicas usando BeautyFlow para gerenciar seus serviços e crescer seus negócios.
+          </p>
+          <div className="flex gap-4 text-3xl">
+            <span>🚀</span>
+            <span>⚡</span>
+            <span>🎯</span>
+            <span>💎</span>
+          </div>
+          <p className="text-emerald-100 mt-12 text-sm">30 dias de trial grátis. Sem cartão de crédito.</p>
+        </div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md border border-gray-100 rounded-lg">
-        <div className="bg-white px-4 py-8 shadow-sm sm:rounded-lg sm:px-10">
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <input name="firstName" type="text" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-pink-500 sm:text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input name="lastName" type="text" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-pink-500 sm:text-sm" />
-              </div>
-            </div>
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 py-12 bg-white overflow-y-auto">
+        <div className="w-full max-w-md mx-auto">
+          {/* Logo e Título */}
+          <div className="mb-10">
+            <Link href="/" className="inline-flex items-center gap-2 mb-8">
+              <div className="text-3xl">🌸</div>
+              <span className="text-2xl font-bold text-blue-900">BeautyFlow</span>
+            </Link>
+            <h2 className="text-3xl font-bold text-slate-900">Criar Conta</h2>
+            <p className="text-slate-600 mt-2">
+              Configure sua clínica em minutos
+            </p>
+          </div>
 
+          {/* Form */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Clinic Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Clinic Name</label>
-              <input name="clinicName" type="text" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-pink-500 sm:text-sm" />
+              <label className="block text-sm font-semibold text-slate-900 mb-1.5">
+                Nome da Clínica
+              </label>
+              <input
+                name="clinicName"
+                type="text"
+                required
+                placeholder="Clínica BeautyFlow"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition text-sm"
+              />
             </div>
 
+            {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email address</label>
-              <input name="email" type="email" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-pink-500 sm:text-sm" />
+              <label className="block text-sm font-semibold text-slate-900 mb-1.5">
+                Seu Nome
+              </label>
+              <input
+                name="firstName"
+                type="text"
+                required
+                placeholder="João Silva"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition text-sm"
+              />
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input name="password" type="password" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-pink-500 sm:text-sm" />
+              <label className="block text-sm font-semibold text-slate-900 mb-1.5">
+                Email
+              </label>
+              <input
+                name="email"
+                type="email"
+                required
+                placeholder="seu@email.com"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition text-sm"
+              />
             </div>
 
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-1.5">
+                Senha
+              </label>
+              <input
+                name="password"
+                type="password"
+                required
+                placeholder="••••••••"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition text-sm"
+              />
+            </div>
+
+            {/* Error Message */}
             {error && (
-              <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md border border-red-100">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex w-full justify-center rounded-md border border-transparent bg-pink-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {loading ? "Creating account..." : "Get Started"}
-              </button>
-            </div>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-emerald-600 text-white font-semibold py-3 rounded-lg hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-6"
+            >
+              {loading ? "Criando Conta..." : "Cadastrar"}
+              {!loading && <ArrowRight className="w-5 h-5" />}
+            </button>
           </form>
+
+          {/* Login Link */}
+          <p className="mt-8 text-center text-sm text-slate-600">
+            Já tem conta?{" "}
+            <Link href="/login" className="font-semibold text-emerald-600 hover:text-emerald-700">
+              Entrar
+            </Link>
+          </p>
         </div>
       </div>
     </div>

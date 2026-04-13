@@ -2,30 +2,64 @@ import { ClientUseCases } from "@/application/client/ClientUseCases";
 import { AppointmentUseCases } from "@/application/appointment/AppointmentUseCases";
 import { EmployeeUseCases } from "@/application/employee/EmployeeUseCases";
 import { ServiceUseCases } from "@/application/service/ServiceUseCases";
+import { Appointment } from "@/domain/appointment/Appointment";
+import { Service } from "@/domain/service/Service";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [aptRes, cliRes, srvRes, empRes] = await Promise.all([
-    AppointmentUseCases.getAppointments(),
-    ClientUseCases.getClients(),
-    ServiceUseCases.getServices(),
-    EmployeeUseCases.getEmployees(),
-  ]);
-
-  const appointments = aptRes.success && aptRes.data ? aptRes.data : [];
-  const clients = cliRes.success && cliRes.data ? cliRes.data : [];
-  const services = srvRes.success && srvRes.data ? srvRes.data : [];
-  const employees = empRes.success && empRes.data ? empRes.data : [];
-
+  // Calculate date range for relevant data
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  
+  const nextWeek = new Date(today);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+
+  // Fetch paginated data with limits to improve performance
+  // Instead of loading ALL records, we load only what's needed for the dashboard
+  const [aptRes, cliRes, srvRes, empRes] = await Promise.all([
+    // Get appointments for next 7 days (page 1, 20 per page)
+    AppointmentUseCases.getAppointmentsPaginated(1, 20, { 
+      status: 'scheduled' 
+    }),
+    // Get clients (page 1, 20 per page)
+    ClientUseCases.getClientsPaginated(1, 20),
+    // Get services (page 1, 50 per page)  
+    ServiceUseCases.getServicesPaginated?.(1, 50) || ServiceUseCases.getServices(),
+    // Get employees (page 1, 50 per page)
+    EmployeeUseCases.getEmployeesPaginated?.(1, 50) || EmployeeUseCases.getEmployees(),
+  ]);
+
+  // Extract data from paginated results
+  const appointments = !aptRes.success 
+    ? [] 
+    : (aptRes.data && typeof aptRes.data === 'object' && 'items' in aptRes.data)
+      ? (aptRes.data as any).items
+      : Array.isArray(aptRes.data) ? aptRes.data : [];
+    
+  const clients = !cliRes.success 
+    ? [] 
+    : (cliRes.data && typeof cliRes.data === 'object' && 'items' in cliRes.data)
+      ? (cliRes.data as any).items
+      : Array.isArray(cliRes.data) ? cliRes.data : [];
+    
+  const services = !srvRes.success 
+    ? [] 
+    : (srvRes.data && typeof srvRes.data === 'object' && 'items' in srvRes.data)
+      ? (srvRes.data as any).items
+      : Array.isArray(srvRes.data) ? srvRes.data : [];
+    
+  const employees = !empRes.success 
+    ? [] 
+    : (empRes.data && typeof empRes.data === 'object' && 'items' in empRes.data)
+      ? (empRes.data as any).items
+      : Array.isArray(empRes.data) ? empRes.data : [];
 
   const upcomingAppointments = appointments.filter(
-    (a) => new Date(a.start_time) >= today && a.status === "scheduled"
+    (a: Appointment) => new Date(a.start_time) >= today && a.status === "scheduled"
   );
-  const todaysAppointments = upcomingAppointments.filter((a) => {
+  const todaysAppointments = upcomingAppointments.filter((a: Appointment) => {
     const d = new Date(a.start_time);
     return (
       d.getDate() === today.getDate() &&
@@ -88,7 +122,7 @@ export default async function DashboardPage() {
         />
         <MetricCard
           title="Active Services"
-          value={services.filter((s) => s.is_active).length}
+          value={services.filter((s: Service) => s.is_active).length}
           href="/services"
           icon={
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -108,7 +142,6 @@ export default async function DashboardPage() {
           }
           colorClass="danger"
         />
-      </div>
       </div>
 
       {/* Quick Actions */}
