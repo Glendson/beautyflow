@@ -19,18 +19,13 @@
 
 import { createClient as createDefaultClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { logger } from './logger';
 
 export async function createAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
   if (!serviceRoleKey) {
-    console.warn(
-      '⚠️ [AdminClient] SUPABASE_SERVICE_ROLE_KEY not found\n' +
-      '   This is required to bypass email validation.\n' +
-      '   Either:\n' +
-      '   1. Add SERVICE_ROLE_KEY to .env.local\n' +
-      '   2. OR disable "Email Confirmations" in Supabase Dashboard\n'
-    );
+    logger.warn('SUPABASE_SERVICE_ROLE_KEY not found - admin client unavailable');
     return null;
   }
 
@@ -59,7 +54,7 @@ export async function signUpWithBypass(
     const adminClient = await createAdminClient();
     
     if (adminClient) {
-      console.log('🔑 [SignUp] Using Admin Client to bypass email validation...');
+      logger.info('Using Admin Client to bypass email validation');
       
       const { data, error } = await adminClient.auth.admin.createUser({
         email,
@@ -69,15 +64,15 @@ export async function signUpWithBypass(
       });
 
       if (error) {
-        console.error('❌ [SignUp] Admin signup failed:', error.message);
+        logger.error('Admin signup failed', error);
         return { data: null, error };
       }
 
-      console.log('✅ [SignUp] User created with admin client:', data.user?.id);
+      logger.success('User created with admin client');
       return { data, error: null };
     }
   } catch (err) {
-    console.error('❌ [SignUp] Admin client error:', err);
+    logger.error('Admin client error', err as Error);
   }
 
   // Fallback: return null to let caller know admin signup wasn't possible

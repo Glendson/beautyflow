@@ -1,6 +1,7 @@
 import { IServiceRepository } from "@/domain/service/IServiceRepository";
 import { Service } from "@/domain/service/Service";
 import { Result } from "@/lib/result";
+import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/lib/pagination";
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class ServiceRepository implements IServiceRepository {
@@ -23,6 +24,66 @@ export class ServiceRepository implements IServiceRepository {
     const { data, error } = await supabase.from('services').select('*').eq('category_id', categoryId).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBService[]).map(d => this.mapToEntity(d)));
+  }
+
+  /**
+   * Find services with pagination support
+   * Supports search: name, and filter by category_id and is_active
+   */
+  async findAllPaginated(
+    clinicId: string,
+    page: number,
+    pageSize: number,
+    filters?: { search?: string; categoryId?: string; isActive?: boolean }
+  ): Promise<Result<PaginatedResult<Service>>> {
+    const supabase = await createClient();
+    const { limit, offset } = getPaginationParams(page, pageSize);
+
+    // Build queries
+    let countQuery = supabase
+      .from('services')
+      .select('id', { count: 'exact' })
+      .eq('clinic_id', clinicId);
+
+    let dataQuery = supabase
+      .from('services')
+      .select('*')
+      .eq('clinic_id', clinicId);
+
+    // Apply category filter
+    if (filters?.categoryId) {
+      countQuery = countQuery.eq('category_id', filters.categoryId);
+      dataQuery = dataQuery.eq('category_id', filters.categoryId);
+    }
+
+    // Apply active filter
+    if (filters?.isActive !== undefined) {
+      countQuery = countQuery.eq('is_active', filters.isActive);
+      dataQuery = dataQuery.eq('is_active', filters.isActive);
+    }
+
+    // Apply search filter
+    if (filters?.search) {
+      const searchPattern = `%${filters.search}%`;
+      countQuery = countQuery.ilike('name', searchPattern);
+      dataQuery = dataQuery.ilike('name', searchPattern);
+    }
+
+    // Get count
+    const { count, error: countError } = await countQuery;
+    if (countError) return Result.fail(countError.message);
+
+    // Get data with pagination
+    const { data, error: dataError } = await dataQuery
+      .order('name', { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    if (dataError) return Result.fail(dataError.message);
+
+    const total = count || 0;
+    const services = (data || []).map((d) => this.mapToEntity(d as DBService));
+    
+    return Result.ok(createPaginatedResult(services, total, page, pageSize));
   }
 
   async create(entity: Partial<Service> & { clinic_id: string }): Promise<Result<Service>> {

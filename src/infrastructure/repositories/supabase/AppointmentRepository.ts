@@ -1,6 +1,7 @@
 import { IAppointmentRepository } from "@/domain/appointment/IAppointmentRepository";
 import { Appointment, AppointmentStatus } from "@/domain/appointment/Appointment";
 import { Result } from "@/lib/result";
+import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/lib/pagination";
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class AppointmentRepository implements IAppointmentRepository {
@@ -27,6 +28,70 @@ export class AppointmentRepository implements IAppointmentRepository {
 
     if (error) return Result.fail(error.message);
     return Result.ok((data || []).map((d: DBAppointment) => this.mapToEntity(d)));
+  }
+
+  /**
+   * Find appointments with pagination support
+   * Supports filters: status, clientId, employeeId
+   */
+  async findAllPaginated(
+    clinicId: string,
+    page: number,
+    pageSize: number,
+    filters?: { status?: string; clientId?: string; employeeId?: string; search?: string }
+  ): Promise<Result<PaginatedResult<Appointment>>> {
+    const supabase = await createClient();
+    const { limit, offset } = getPaginationParams(page, pageSize);
+
+    // Build query for count
+    let countQuery = supabase
+      .from('appointments')
+      .select('id', { count: 'exact' })
+      .eq('clinic_id', clinicId);
+
+    // Build query for data
+    let dataQuery = supabase
+      .from('appointments')
+      .select('*')
+      .eq('clinic_id', clinicId);
+
+    // Apply filters
+    if (filters?.status) {
+      countQuery = countQuery.eq('status', filters.status);
+      dataQuery = dataQuery.eq('status', filters.status);
+    }
+
+    if (filters?.clientId) {
+      countQuery = countQuery.eq('client_id', filters.clientId);
+      dataQuery = dataQuery.eq('client_id', filters.clientId);
+    }
+
+    if (filters?.employeeId) {
+      countQuery = countQuery.eq('employee_id', filters.employeeId);
+      dataQuery = dataQuery.eq('employee_id', filters.employeeId);
+    }
+
+    // Apply search (search in client name via join? For now just ID)
+    if (filters?.search) {
+      // Simple search by client_id substring - improve with full-text search later
+      dataQuery = dataQuery.ilike('id', `%${filters.search}%`);
+    }
+
+    // Get count
+    const { count, error: countError } = await countQuery;
+    if (countError) return Result.fail(countError.message);
+
+    // Get data with pagination
+    const { data, error: dataError } = await dataQuery
+      .order('start_time', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (dataError) return Result.fail(dataError.message);
+
+    const total = count || 0;
+    const appointments = (data || []).map((d: DBAppointment) => this.mapToEntity(d));
+    
+    return Result.ok(createPaginatedResult(appointments, total, page, pageSize));
   }
 
   async findByDateRange(clinicId: string, start: Date, end: Date): Promise<Result<Appointment[]>> {

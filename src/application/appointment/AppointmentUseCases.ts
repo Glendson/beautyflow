@@ -2,6 +2,7 @@ import { AppointmentRepository } from "@/infrastructure/repositories/supabase/Ap
 import { Appointment } from "@/domain/appointment/Appointment";
 import { AppointmentValidator } from "@/domain/appointment/AppointmentValidator";
 import { Result } from "@/lib/result";
+import { PaginatedResult } from "@/lib/pagination";
 import { getClinicId } from "@/lib/auth";
 
 const repository = new AppointmentRepository();
@@ -11,6 +12,16 @@ export class AppointmentUseCases {
     const clinicId = await getClinicId();
     if (!clinicId) return Result.fail("Unauthorized");
     return repository.findAll(clinicId);
+  }
+
+  static async getAppointmentsPaginated(
+    page: number,
+    pageSize: number,
+    filters?: { status?: string; clientId?: string; employeeId?: string; search?: string }
+  ): Promise<Result<PaginatedResult<Appointment>>> {
+    const clinicId = await getClinicId();
+    if (!clinicId) return Result.fail("Unauthorized");
+    return repository.findAllPaginated(clinicId, page, pageSize, filters);
   }
 
   static async createAppointment(data: {

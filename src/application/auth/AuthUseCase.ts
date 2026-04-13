@@ -1,6 +1,7 @@
 import { createClient } from "@/infrastructure/supabase/server";
 import { Result } from "@/lib/result";
 import { signUpWithBypass } from "@/lib/auth-admin";
+import { logger } from "@/lib/logger";
 
 export class AuthUseCase {
   static async signUp(
@@ -12,23 +13,23 @@ export class AuthUseCase {
   ): Promise<Result<{ clinicId: string }>> {
     const supabase = await createClient();
 
-    console.log("👤 [AuthUseCase.signUp] Step 1: Creating user...");
+    logger.debug("SignUp - Step 1: Creating user");
     
     // Try admin signup first (bypasses email validation if SERVICE_ROLE_KEY available)
     let authData: any;
     let authError: any;
     
-    console.log("👤 [AuthUseCase.signUp] Attempting admin signup (bypasses email validation)...");
+    logger.debug("SignUp - Attempting admin signup");
     const adminResult = await signUpWithBypass(email, password, {
       emailConfirmed: true,
     });
 
     if (adminResult.data) {
-      console.log("✅ [AuthUseCase.signUp] Admin signup succeeded!");
+      logger.success("Admin signup succeeded");
       authData = adminResult.data;
       authError = null;
     } else {
-      console.log("⚠️ [AuthUseCase.signUp] Admin signup not available, trying regular signup...");
+      logger.info("Admin signup not available, trying regular signup");
       // Fallback to regular signup (may fail if email validation is strict)
       const signupResult = await supabase.auth.signUp({
         email,
@@ -40,13 +41,13 @@ export class AuthUseCase {
     }
 
     if (authError || !authData.user) {
-      console.error("❌ [AuthUseCase.signUp] User creation failed:", authError?.message);
+      logger.error("User creation failed", authError);
       return Result.fail(authError?.message || "Failed to create user");
     }
     
-    console.log("✅ [AuthUseCase.signUp] User created:", authData.user.id);
+    logger.success("User created successfully");
 
-    console.log("👤 [AuthUseCase.signUp] Step 2: Signing in to establish session...");
+    logger.debug("SignUp - Step 2: Signing in to establish session");
     // 2. Faz signIn para estabelecer a sessão nos cookies do servidor
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
@@ -54,11 +55,11 @@ export class AuthUseCase {
     });
 
     if (signInError) {
-      console.error("❌ [AuthUseCase.signUp] SignIn failed:", signInError.message);
+      logger.error("SignIn failed", signInError);
       return Result.fail(signInError.message);
     }
     
-    console.log("✅ [AuthUseCase.signUp] Session established");
+    logger.success("Session established");
 
     // 3. Gera o slug da clínica
     const clinicSlug =
@@ -66,7 +67,7 @@ export class AuthUseCase {
       "-" +
       Math.random().toString(36).substring(2, 6);
 
-    console.log("👤 [AuthUseCase.signUp] Step 3: Calling register_clinic RPC...");
+    logger.debug("SignUp - Step 3: Calling register_clinic RPC");
     // 4. Registra a clínica via RPC (agora com sessão ativa)
     const { data: clinicId, error: rpcError } = await supabase.rpc(
       "register_clinic",
@@ -79,11 +80,11 @@ export class AuthUseCase {
     );
 
     if (rpcError) {
-      console.error("❌ [AuthUseCase.signUp] RPC failed:", rpcError.message);
+      logger.error("RPC register_clinic failed", rpcError);
       return Result.fail(rpcError.message);
     }
     
-    console.log("✅ [AuthUseCase.signUp] Clinic created:", clinicId);
+    logger.success("Clinic created successfully");
 
     return Result.ok({ clinicId: clinicId as string });
   }
@@ -94,7 +95,7 @@ export class AuthUseCase {
   ): Promise<Result<void>> {
     const supabase = await createClient();
 
-    console.log("🔐 [AuthUseCase.signIn] Attempting login...");
+    logger.debug("SignIn - Attempting login");
     
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -102,11 +103,11 @@ export class AuthUseCase {
     });
 
     if (error) {
-      console.error("❌ [AuthUseCase.signIn] Login failed:", error.message);
+      logger.error("Login failed", error);
       return Result.fail(error.message);
     }
     
-    console.log("✅ [AuthUseCase.signIn] Login successful");
+    logger.success("Login successful");
 
     return Result.ok(undefined);
   }
@@ -114,16 +115,16 @@ export class AuthUseCase {
   static async signOut(): Promise<Result<void>> {
     const supabase = await createClient();
 
-    console.log("🚪 [AuthUseCase.signOut] Signing out...");
+    logger.debug("SignOut - Signing out");
 
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      console.error("❌ [AuthUseCase.signOut] Signout failed:", error.message);
+      logger.error("Signout failed", error);
       return Result.fail(error.message);
     }
     
-    console.log("✅ [AuthUseCase.signOut] Signed out");
+    logger.success("Signed out successfully");
 
     return Result.ok(undefined);
   }

@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - heading "Bem-vindo de volta!" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Gerencie sua clínica de estética com eficiência. Acesso a agendamentos, clientes e relatórios em um único lugar.
+      - generic [ref=e7]:
+        - generic [ref=e8]: ✨
+        - generic [ref=e9]: 📅
+        - generic [ref=e10]: 👥
+        - generic [ref=e11]: 📊
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - link "🌸 BeautyFlow" [ref=e15]:
+          - /url: /
+          - generic [ref=e16]: 🌸
+          - generic [ref=e17]: BeautyFlow
+        - heading "Entrar" [level=2] [ref=e18]
+        - paragraph [ref=e19]: Use suas credenciais para acessar sua clínica
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: Email
+          - textbox "seu@email.com" [ref=e23]
+        - generic [ref=e24]:
+          - generic [ref=e25]: Senha
+          - textbox "••••••••" [ref=e26]
+        - link "Esqueci minha senha" [ref=e28]:
+          - /url: "#"
+        - button "Entrar" [ref=e29]:
+          - text: Entrar
+          - img [ref=e30]
+      - paragraph [ref=e32]:
+        - text: Não tem conta?
+        - link "Cadastre-se agora" [ref=e33]:
+          - /url: /signup
+  - button "Open Next.js Dev Tools" [ref=e39] [cursor=pointer]:
+    - img [ref=e40]
+  - alert [ref=e45]
+```

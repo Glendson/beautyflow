@@ -1,6 +1,7 @@
 import { IEmployeeRepository } from "@/domain/employee/IEmployeeRepository";
 import { Employee } from "@/domain/employee/Employee";
 import { Result } from "@/lib/result";
+import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/lib/pagination";
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class EmployeeRepository implements IEmployeeRepository {
@@ -15,6 +16,54 @@ export class EmployeeRepository implements IEmployeeRepository {
     const { data, error } = await supabase.from('employees').select('*').eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBEmployee[]).map(d => this.mapToEntity(d)));
+  }
+
+  /**
+   * Find employees with pagination support
+   * Supports search: name
+   */
+  async findAllPaginated(
+    clinicId: string,
+    page: number,
+    pageSize: number,
+    filters?: { search?: string }
+  ): Promise<Result<PaginatedResult<Employee>>> {
+    const supabase = await createClient();
+    const { limit, offset } = getPaginationParams(page, pageSize);
+
+    // Build queries
+    let countQuery = supabase
+      .from('employees')
+      .select('id', { count: 'exact' })
+      .eq('clinic_id', clinicId);
+
+    let dataQuery = supabase
+      .from('employees')
+      .select('*')
+      .eq('clinic_id', clinicId);
+
+    // Apply search filter
+    if (filters?.search) {
+      const searchPattern = `%${filters.search}%`;
+      countQuery = countQuery.ilike('name', searchPattern);
+      dataQuery = dataQuery.ilike('name', searchPattern);
+    }
+
+    // Get count
+    const { count, error: countError } = await countQuery;
+    if (countError) return Result.fail(countError.message);
+
+    // Get data with pagination
+    const { data, error: dataError } = await dataQuery
+      .order('name', { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    if (dataError) return Result.fail(dataError.message);
+
+    const total = count || 0;
+    const employees = (data || []).map((d) => this.mapToEntity(d as DBEmployee));
+    
+    return Result.ok(createPaginatedResult(employees, total, page, pageSize));
   }
   async create(entity: Partial<Employee> & { clinic_id: string }): Promise<Result<Employee>> {
     const supabase = await createClient();

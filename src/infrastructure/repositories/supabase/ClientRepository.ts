@@ -1,7 +1,9 @@
 import { IRepository } from "@/domain/repository";
 import { Client } from "@/domain/client/Client";
 import { Result } from "@/lib/result";
+import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/lib/pagination";
 import { createClient } from "@/infrastructure/supabase/server";
+import { escapeLike, validateSearchInput } from "@/lib/sql-escaping";
 
 export interface IClientRepository extends IRepository<Client> {}
 
@@ -17,6 +19,65 @@ export class ClientRepository implements IClientRepository {
     const { data, error } = await supabase.from('clients').select('*').eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBClient[]).map(d => this.mapToEntity(d)));
+  }
+
+  /**
+   * Find clients with pagination support
+   * Supports search: name, email
+   */
+  async findAllPaginated(
+    clinicId: string,
+    page: number,
+    pageSize: number,
+    filters?: { search?: string }
+  ): Promise<Result<PaginatedResult<Client>>> {
+    const supabase = await createClient();
+    const { limit, offset } = getPaginationParams(page, pageSize);
+
+    // Build queries
+    let countQuery = supabase
+      .from('clients')
+      .select('id', { count: 'exact' })
+      .eq('clinic_id', clinicId);
+
+    let dataQuery = supabase
+      .from('clients')
+      .select('*')
+      .eq('clinic_id', clinicId);
+
+    // Apply search filter with proper escaping
+    if (filters?.search) {
+      const validatedSearch = validateSearchInput(filters.search);
+      if (validatedSearch) {
+        // Escape % and _ to prevent SQL injection via LIKE pattern
+        const escaped = escapeLike(validatedSearch);
+        const searchPattern = `%${escaped}%`;
+        
+        countQuery = countQuery.or(`name.ilike.${searchPattern},email.ilike.${searchPattern}`);
+        // For data query, use ilike for either name or email
+        dataQuery = supabase
+          .from('clients')
+          .select('*')
+          .eq('clinic_id', clinicId)
+          .or(`name.ilike.${searchPattern},email.ilike.${searchPattern}`);
+      }
+    }
+
+    // Get count
+    const { count, error: countError } = await countQuery;
+    if (countError) return Result.fail(countError.message);
+
+    // Get data with pagination
+    const { data, error: dataError } = await dataQuery
+      .order('name', { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    if (dataError) return Result.fail(dataError.message);
+
+    const total = count || 0;
+    const clients = (data || []).map((d) => this.mapToEntity(d as DBClient));
+    
+    return Result.ok(createPaginatedResult(clients, total, page, pageSize));
   }
   async create(entity: Partial<Client> & { clinic_id: string }): Promise<Result<Client>> {
     const supabase = await createClient();
