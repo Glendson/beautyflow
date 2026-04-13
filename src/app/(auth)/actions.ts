@@ -11,6 +11,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { Result } from "@/lib/result";
 import { getClinicId } from "@/lib/auth";
+import { logger } from "@/lib/logger";
+import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { Clinic } from "@/domain/clinic/Clinic";
 import { Appointment } from "@/domain/appointment/Appointment";
 import { Client } from "@/domain/client/Client";
@@ -29,27 +31,36 @@ export async function loginAction(formData: FormData): Promise<Result<void>> {
     return Result.fail("Email and password are required.");
   }
 
-  console.log("🔐 [LOGIN] Starting login for:", email);
+  // Rate limiting: 5 login attempts per hour
+  const rateLimitResult = checkRateLimit(`login:${email}`, 5, 3600000);
+  if (!rateLimitResult.success) {
+    logger.warn(`Login rate limit exceeded for: ${email}`);
+    return Result.fail(
+      `Too many login attempts. Please try again in ${rateLimitResult.retryAfterSeconds} seconds.`
+    );
+  }
+
+  logger.debug("Login attempt");
 
   const result = await AuthUseCase.signIn(email, password);
-  console.log("🔐 [LOGIN] AuthUseCase result:", result.success ? "✅ SUCCESS" : "❌ FAILED");
   
   if (result.success) {
     const clinicId = await getClinicId();
     
     if (!clinicId) {
-      console.error("❌ [LOGIN] No clinic ID found!");
+      logger.error("No clinic ID found after login");
       return Result.fail("User authenticated but clinic information not found. Please contact support.");
     }
     
-    console.log("✅ [LOGIN] Clinic ID found:", clinicId);
-    console.log("🔐 [LOGIN] Redirecting to /dashboard...");
+    // Reset rate limit on successful login
+    resetRateLimit(`login:${email}`);
+    logger.success("Login successful");
     
     await new Promise(resolve => setTimeout(resolve, 800));
     redirect("/dashboard");
   }
 
-  console.log("❌ [LOGIN] Login failed:", result.error);
+  logger.error("Login failed", result.error as any);
   return result;
 }
 
@@ -64,28 +75,36 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
     return Result.fail("All fields are required.");
   }
 
-  console.log("🔐 [SIGNUP] Starting signup for:", email);
+  // Rate limiting: 3 signup attempts per hour per IP/email
+  const rateLimitResult = checkRateLimit(`signup:${email}`, 3, 3600000);
+  if (!rateLimitResult.success) {
+    logger.warn(`Signup rate limit exceeded for: ${email}`);
+    return Result.fail(
+      `Too many signup attempts. Please try again in ${rateLimitResult.retryAfterSeconds} seconds.`
+    );
+  }
+
+  logger.debug("Signup attempt");
 
   const result = await AuthUseCase.signUp(email, password, clinicName, firstName, lastName ?? "");
-  console.log("🔐 [SIGNUP] AuthUseCase result:", result.success ? "✅ SUCCESS" : "❌ FAILED");
 
   if (result.success) {
-    console.log("🔐 [SIGNUP] Getting clinic ID...");
+    logger.debug("Getting clinic ID after signup");
     const clinicId = await getClinicId();
     
     if (!clinicId) {
-      console.error("❌ [SIGNUP] No clinic ID found after signup!");
+      logger.error("No clinic ID found after signup");
       return Result.fail("Registration successful, but clinic information could not be retrieved. Please try logging in.");
     }
     
-    console.log("✅ [SIGNUP] Clinic ID found:", clinicId);
-    console.log("🔐 [SIGNUP] Redirecting to /dashboard...");
+    // Reset rate limit on successful signup
+    resetRateLimit(`signup:${email}`);
+    logger.success("Signup successful");
     
-    await new Promise(resolve => setTimeout(resolve, 800));
-    redirect("/dashboard");
+    return Result.ok({ clinicId });
   }
 
-  console.log("❌ [SIGNUP] Signup failed:", result.error);
+  logger.error("Signup failed", result.error as any);
   return result;
 }
 
