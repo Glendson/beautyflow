@@ -29,11 +29,11 @@ export default function SettingsPage() {
         if (result.success && result.data) {
           setClinic(result.data);
           setClinicName(result.data.name);
-          setEmail(result.data.email);
-          setPhone(result.data.phone);
-          setAddress(result.data.address);
-          setWorkingHoursStart(result.data.working_hours_start);
-          setWorkingHoursEnd(result.data.working_hours_end);
+          setEmail(result.data.email || "");
+          setPhone(result.data.phone || "");
+          setAddress(result.data.address || "");
+          setWorkingHoursStart(result.data.working_hours_start || "08:00");
+          setWorkingHoursEnd(result.data.working_hours_end || "18:00");
           console.log("✅ [SETTINGS] Clinic data loaded:", result.data.name);
         } else {
           console.error("❌ [SETTINGS] Failed to load clinic:", result.error);
@@ -101,11 +101,11 @@ export default function SettingsPage() {
   const handleDiscard = () => {
     if (clinic) {
       setClinicName(clinic.name);
-      setEmail(clinic.email);
-      setPhone(clinic.phone);
-      setAddress(clinic.address);
-      setWorkingHoursStart(clinic.working_hours_start);
-      setWorkingHoursEnd(clinic.working_hours_end);
+      setEmail(clinic.email || "");
+      setPhone(clinic.phone || "");
+      setAddress(clinic.address || "");
+      setWorkingHoursStart(clinic.working_hours_start || "08:00");
+      setWorkingHoursEnd(clinic.working_hours_end || "18:00");
       setMessage(null);
       console.log("↩️ [SETTINGS] Changes discarded");
     }

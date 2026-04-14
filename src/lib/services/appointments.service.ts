@@ -37,13 +37,6 @@ export const AppointmentService = {
   },
 
   /**
-   * Get appointment by ID
-   */
-  async getById(id: string): Promise<Result<Appointment>> {
-    return AppointmentUseCases.getAppointmentById(id);
-  },
-
-  /**
    * Create a new appointment
    */
   async create(data: {
@@ -86,37 +79,5 @@ export const AppointmentService = {
    */
   async markNoShow(appointmentId: string): Promise<Result<Appointment>> {
     return AppointmentUseCases.updateAppointmentStatus(appointmentId, "no_show");
-  },
-
-  /**
-   * Get appointments by date range
-   */
-  async getByDateRange(
-    startDate: Date,
-    endDate: Date
-  ): Promise<Result<Appointment[]>> {
-    return AppointmentUseCases.getAppointmentsByDateRange(startDate, endDate);
-  },
-
-  /**
-   * Get appointments for a specific employee on a date
-   */
-  async getEmployeeSchedule(
-    employeeId: string,
-    date: Date
-  ): Promise<Result<Appointment[]>> {
-    return AppointmentUseCases.getEmployeeSchedule(employeeId, date);
-  },
-
-  /**
-   * Check for conflicts (overlapping appointments)
-   */
-  async checkConflicts(data: {
-    employee_id: string;
-    start_time: Date;
-    end_time: Date;
-    exclude_id?: string;
-  }): Promise<Result<boolean>> {
-    return AppointmentUseCases.checkForConflicts(data);
   },
 };

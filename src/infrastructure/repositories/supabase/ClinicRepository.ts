@@ -61,12 +61,12 @@ export class ClinicRepository implements IClinicRepository {
     // Build update payload - only include fields that are being updated
     const updatePayload: Partial<DBClinic> = {};
     if (data.name !== undefined) updatePayload.name = data.name;
-    if (data.email !== undefined) updatePayload.email = data.email;
-    if (data.phone !== undefined) updatePayload.phone = data.phone;
-    if (data.address !== undefined) updatePayload.address = data.address;
-    if (data.working_hours_start !== undefined) updatePayload.working_hours_start = data.working_hours_start;
-    if (data.working_hours_end !== undefined) updatePayload.working_hours_end = data.working_hours_end;
-    if (data.logo_url !== undefined) updatePayload.logo_url = data.logo_url;
+    if (data.email !== undefined) updatePayload.email = data.email as any;
+    if (data.phone !== undefined) updatePayload.phone = data.phone as any;
+    if (data.address !== undefined) updatePayload.address = data.address as any;
+    if (data.working_hours_start !== undefined) updatePayload.working_hours_start = data.working_hours_start as any;
+    if (data.working_hours_end !== undefined) updatePayload.working_hours_end = data.working_hours_end as any;
+    if (data.logo_url !== undefined) updatePayload.logo_url = data.logo_url as any;
 
     const { data: updatedData, error } = await supabase
       .from("clinics")
@@ -97,6 +97,7 @@ export class ClinicRepository implements IClinicRepository {
     return {
       id: data.id,
       name: data.name,
+      slug: data.slug,
       email: data.email,
       phone: data.phone,
       address: data.address,
@@ -112,6 +113,7 @@ export class ClinicRepository implements IClinicRepository {
 interface DBClinic {
   id: string;
   name: string;
+  slug: string;
   email: string;
   phone: string;
   address: string;

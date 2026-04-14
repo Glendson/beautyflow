@@ -34,7 +34,7 @@ export async function loginAction(formData: FormData): Promise<Result<void>> {
   // Rate limiting: 5 login attempts per hour
   const rateLimitResult = checkRateLimit(`login:${email}`, 5, 3600000);
   if (!rateLimitResult.success) {
-    logger.warn(`Login rate limit exceeded for: ${email}`);
+    logger.warn(`Login rate limit exceeded`);
     return Result.fail(
       `Too many login attempts. Please try again in ${rateLimitResult.retryAfterSeconds} seconds.`
     );
@@ -78,7 +78,7 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
   // Rate limiting: 3 signup attempts per hour per IP/email
   const rateLimitResult = checkRateLimit(`signup:${email}`, 3, 3600000);
   if (!rateLimitResult.success) {
-    logger.warn(`Signup rate limit exceeded for: ${email}`);
+    logger.warn(`Signup rate limit exceeded`);
     return Result.fail(
       `Too many signup attempts. Please try again in ${rateLimitResult.retryAfterSeconds} seconds.`
     );

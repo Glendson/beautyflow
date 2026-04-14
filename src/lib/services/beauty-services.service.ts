@@ -49,8 +49,9 @@ export const ServiceService = {
     name: string;
     duration_minutes: number;
     price: number;
+    is_active?: boolean;
   }): Promise<Result<Service>> {
-    return ServiceUseCases.createService(data);
+    return ServiceUseCases.createService(data as any);
   },
 
   /**
@@ -88,20 +89,6 @@ export const ServiceService = {
    */
   async activate(id: string): Promise<Result<Service>> {
     return ServiceUseCases.updateService(id, { is_active: true });
-  },
-
-  /**
-   * Get services by category
-   */
-  async getByCategory(categoryId: string): Promise<Result<Service[]>> {
-    return ServiceUseCases.getServicesByCategory(categoryId);
-  },
-
-  /**
-   * Get active services
-   */
-  async getActive(): Promise<Result<Service[]>> {
-    return ServiceUseCases.getActiveServices();
   },
 
   /**

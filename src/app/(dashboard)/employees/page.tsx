@@ -62,12 +62,10 @@ export default function EmployeesPage() {
   const handleModalSubmit = async (data: EmployeeFormData) => {
     try {
       setIsSubmitting(true);
-      const result = await createEmployeeAction({
-        name: data.name,
-        email: data.email,
-        phone: data.phone || null,
-        specialization: data.specialization,
-      });
+      const result = await createEmployeeAction(
+        { name: data.name },
+        undefined
+      );
 
       if (result.success) {
         setModalOpen(false);
@@ -159,9 +157,9 @@ export default function EmployeesPage() {
                           <span className="font-semibold">{employee.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-neutral-700">{employee.email}</TableCell>
+                      <TableCell className="text-sm text-neutral-700">{employee.email || "-"}</TableCell>
                       <TableCell className="text-sm text-neutral-700">{employee.phone || "-"}</TableCell>
-                      <TableCell>{employee.specialization || "-"}</TableCell>
+                      <TableCell className="text-sm text-neutral-700">{employee.specialty || "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <button onClick={() => handleEditEmployee(employee)} className="p-1.5 hover:bg-neutral-100 rounded transition">
@@ -198,9 +196,9 @@ export default function EmployeesPage() {
           selectedEmployee && modalMode === "edit"
             ? {
                 name: selectedEmployee.name,
-                email: selectedEmployee.email,
+                email: selectedEmployee.email || undefined,
                 phone: selectedEmployee.phone || "",
-                specialization: selectedEmployee.specialization,
+                specialization: selectedEmployee.specialty || undefined,
               }
             : undefined
         }

@@ -173,7 +173,7 @@ export default function ServicesPage() {
                         <div className="flex items-center gap-1.5 font-semibold">
                           <DollarSign className="w-4 h-4 text-emerald-600" />
                           <span className="text-emerald-600">
-                            {service.price.toFixed(2).replace(".", ",")}
+                            {(service.price || 0).toFixed(2).replace(".", ",")}
                           </span>
                         </div>
                       </TableCell>
@@ -222,7 +222,7 @@ export default function ServicesPage() {
                 description: selectedService.description,
                 durationMinutes: selectedService.duration_minutes,
                 price: selectedService.price,
-                categoryId: selectedService.category_id,
+                categoryId: selectedService.category_id || undefined,
                 isActive: selectedService.is_active,
               }
             : undefined

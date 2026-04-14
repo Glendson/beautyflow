@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
 import { Plus, Search, Edit, Trash2, MapPin } from "lucide-react";
 import { RoomModal, RoomFormData, DeleteConfirmationModal } from "@/components/modals";
-import { listRoomsAction, createRoomAction, deleteRoomAction } from "@/app/(auth)/actions";
+import { listRoomsAction, createRoomAction, updateRoomAction, deleteRoomAction } from "@/app/(auth)/actions";
 import { Room } from "@/domain/room/Room";
 import { PaginatedResult } from "@/lib/pagination";
 
@@ -75,10 +75,7 @@ export default function RoomsPage() {
           fetchRooms(currentPage);
         }
       } else if (selectedRoom) {
-        const result = await createRoomAction({
-          ...data,
-          id: selectedRoom.id,
-        });
+        const result = await updateRoomAction(selectedRoom.id, data);
         if (result.success) {
           setModalOpen(false);
           fetchRooms(currentPage);
@@ -110,12 +107,8 @@ export default function RoomsPage() {
     }
   };
 
-  const handlePageChange = (direction: string) => {
-    if (direction === "next" && paginationData && currentPage < paginationData.totalPages) {
-      fetchRooms(currentPage + 1);
-    } else if (direction === "prev" && currentPage > 1) {
-      fetchRooms(currentPage - 1);
-    }
+  const handlePageChange = (page: number) => {
+    fetchRooms(page);
   };
 
   return (
@@ -160,15 +153,14 @@ export default function RoomsPage() {
                   <TableRow key={room.id}>
                     <TableCell className="font-medium">{room.name}</TableCell>
                     <TableCell>
-                      <Badge variant={room.type === "room" ? "default" : "secondary"}>
+                      <Badge variant={room.type === "room" ? "default" : "info"}>
                         {room.type === "room" ? "Sala" : "Estação"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{room.capacity || "-"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleEditRoom(room)}
                           className="text-primary hover:text-primary-dark"
@@ -176,7 +168,7 @@ export default function RoomsPage() {
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDeleteClick(room)}
                           className="text-danger hover:text-danger-dark"
@@ -206,22 +198,31 @@ export default function RoomsPage() {
       <RoomModal
         open={modalOpen}
         mode={modalMode}
-        initialData={selectedRoom}
+        title={modalMode === "create" ? "Novo Ambiente" : "Editar Ambiente"}
+        initialData={
+          selectedRoom && modalMode === "edit"
+            ? {
+                name: selectedRoom.name,
+                type: selectedRoom.type,
+              }
+            : undefined
+        }
         onSubmit={handleModalSubmit}
         isLoading={isSubmitting}
-        onClose={() => setModalOpen(false)}
+        onCancel={() => setModalOpen(false)}
       />
 
       <DeleteConfirmationModal
         open={deleteModalOpen}
         title="Deletar Ambiente"
-        description={`Tem certeza que deseja deletar o ambiente "${roomToDelete?.name}"?`}
+        message={`Tem certeza que deseja deletar o ambiente "${roomToDelete?.name}"?`}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setDeleteModalOpen(false);
           setRoomToDelete(null);
         }}
         isLoading={isDeleting}
+        isDangerous
       />
     </div>
   );

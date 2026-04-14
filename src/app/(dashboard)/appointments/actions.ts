@@ -24,7 +24,7 @@ export async function createAppointmentAction(formData: FormData) {
     return { success: false, error: "Service not found" };
   }
 
-  const durationMins = serviceRes.data.duration;
+  const durationMins = serviceRes.data.duration || 60; // Default to 60 minutes if not specified
   const end_time = new Date(start_time.getTime() + durationMins * 60000);
 
   const result = await AppointmentService.create({

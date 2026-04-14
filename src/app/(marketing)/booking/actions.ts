@@ -70,7 +70,7 @@ export async function getAvailableSlotsAction(
     if (!result.success) {
       return {
         success: false,
-        error: result.error || 'Failed to fetch available slots',
+        error: (result as any).error || 'Failed to fetch available slots',
       };
     }
 
@@ -135,7 +135,7 @@ export async function createBookingAction(data: BookingData) {
       .eq('id', data.serviceId)
       .single();
 
-    const durationMinutes = service?.duration_minutes || 60;
+    const durationMinutes = (service as any)?.duration_minutes || 60;
     const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
 
     // Check availability one more time

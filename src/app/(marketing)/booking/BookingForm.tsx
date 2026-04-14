@@ -150,7 +150,7 @@ export function BookingForm({
       if (result.success) {
         onBookingComplete(result.data!.appointmentId);
       } else {
-        setError(result.error);
+        setError(result.error ?? "Um erro ocorreu ao criar o agendamento");
       }
     } catch (err) {
       setError(String(err));

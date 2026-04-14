@@ -1,62 +1,111 @@
 /**
- * Logger utility - Conditional logging (dev-only)
+ * Logger utility - Production-ready conditional logging
+ * 
+ * Features:
+ * - Dev: Console output for debugging
+ * - Prod: Structured JSON logs (for log aggregation services)
+ * - Security: NO sensitive data (emails, passwords, JWTs, PII) logged
+ * - GDPR: Compliant - no user data retained in logs
  * 
  * Usage:
  * logger.info("User signup started");
  * logger.error("Auth failed", error);
- * logger.debug("User ID", userId); // Only in dev
- * 
- * Automatically disabled in production for:
- * - Security (no exposed PII/IDs)
- * - Performance (no console I/O)
- * - GDPR compliance (no data logging)
+ * logger.debug("Debug info"); // Only in dev
+ * logger.warn("Rate limit exceeded");
  */
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// Log levels for structured logging
+export enum LogLevel {
+  DEBUG = 'DEBUG',
+  INFO = 'INFO',
+  WARN = 'WARN',
+  ERROR = 'ERROR',
+}
+
+interface LogEntry {
+  level: LogLevel;
+  timestamp: string;
+  message: string;
+  service: string;
+}
+
+/**
+ * Format log entry for production (JSON structure)
+ */
+function formatProdLog(level: LogLevel, message: string): string {
+  const entry: LogEntry = {
+    level,
+    timestamp: new Date().toISOString(),
+    message,
+    service: 'beautyflow',
+  };
+  return JSON.stringify(entry);
+}
+
 export const logger = {
   /**
-   * Log info-level messages (dev only)
+   * Info-level logs (dev only)
    */
   info: (message: string, data?: unknown) => {
     if (isDev) {
       console.info(`[BeautyFlow] ${message}`, data ? JSON.stringify(data) : '');
+    } else {
+      console.log(formatProdLog(LogLevel.INFO, message));
     }
   },
 
   /**
-   * Log debug messages (dev only, most verbose)
+   * Debug-level logs (dev only)
    */
   debug: (message: string, data?: unknown) => {
     if (isDev) {
       console.debug(`[BeautyFlow:DEBUG] ${message}`, data ? JSON.stringify(data) : '');
     }
+    // No logging in production for debug
   },
 
   /**
-   * Log warnings (always logged, never exposes data)
+   * Warning logs (always, generic message only)
    */
   warn: (message: string) => {
-    console.warn(`[BeautyFlow:WARN] ${message}`);
-  },
-
-  /**
-   * Log errors (always logged, but never exposes sensitive data)
-   */
-  error: (message: string, error?: Error | unknown) => {
-    if (error instanceof Error) {
-      console.error(`[BeautyFlow:ERROR] ${message}:`, error.message);
+    if (isDev) {
+      console.warn(`[BeautyFlow:WARN] ${message}`);
     } else {
-      console.error(`[BeautyFlow:ERROR] ${message}`);
+      console.log(formatProdLog(LogLevel.WARN, message));
     }
   },
 
   /**
-   * Log successful operations (dev only)
+   * Error logs (always, never expose stack traces or sensitive data)
+   * Only message is logged, never stack or user context
+   */
+  error: (message: string, error?: Error | unknown) => {
+    let logMessage = message;
+    if (error instanceof Error && error.message) {
+      // Log only error message, never stack trace
+      logMessage = `${message}: ${error.message}`;
+    }
+    
+    if (isDev) {
+      console.error(`[BeautyFlow:ERROR] ${logMessage}`);
+      // In dev, optionally show stack for debugging
+      if (error instanceof Error && error.stack) {
+        console.error(error.stack);
+      }
+    } else {
+      console.log(formatProdLog(LogLevel.ERROR, logMessage));
+    }
+  },
+
+  /**
+   * Success logs (dev only)
    */
   success: (message: string) => {
     if (isDev) {
       console.log(`[BeautyFlow:✓] ${message}`);
     }
+    // No logging in production for success
   },
 };
