@@ -7,7 +7,7 @@ import { ClientUseCases } from "@/application/client/ClientUseCases";
 import { ServiceUseCases } from "@/application/service/ServiceUseCases";
 import { EmployeeUseCases } from "@/application/employee/EmployeeUseCases";
 import { RoomUseCases } from "@/application/room/RoomUseCases";
-import { redirect } from "next/navigation";
+import { redirect } from \"next/navigation\";\nimport { logger } from \"@/lib/logger\";
 import { revalidatePath } from "next/cache";
 import { Result } from "@/lib/result";
 import { getClinicId } from "@/lib/auth";
@@ -60,7 +60,7 @@ export async function loginAction(formData: FormData): Promise<Result<void>> {
     redirect("/dashboard");
   }
 
-  logger.error("Login failed", result.error as any);
+  logger.error("Login failed", result.error);
   return result;
 }
 
@@ -104,7 +104,7 @@ export async function signupAction(formData: FormData): Promise<Result<{ clinicI
     return Result.ok({ clinicId });
   }
 
-  logger.error("Signup failed", result.error as any);
+  logger.error("Signup failed", result.error);
   return result;
 }
 

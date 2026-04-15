@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Room } from "@/domain/room/Room";
 import { createRoomAction, deleteRoomAction } from "./actions";
+import { useToast } from "@/components/ui/Toast";
 
 export default function RoomList({ initialRooms }: { initialRooms: Room[] }) {
+  const toast = useToast();
   const [rooms, setRooms] = useState(initialRooms);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -13,8 +15,12 @@ export default function RoomList({ initialRooms }: { initialRooms: Room[] }) {
     if (!confirm("Are you sure you want to remove this room?")) return;
     setLoadingId(id);
     const res = await deleteRoomAction(id);
-    if (res.success) setRooms((prev) => prev.filter((r) => r.id !== id));
-    else alert("Failed to delete room");
+    if (res.success) {
+      setRooms((prev) => prev.filter((r) => r.id !== id));
+      toast.showToast("Room deleted successfully", "success");
+    } else {
+      toast.showToast("Failed to delete room", "error");
+    }
     setLoadingId(null);
   };
 
@@ -49,7 +55,10 @@ export default function RoomList({ initialRooms }: { initialRooms: Room[] }) {
               if (res.success && "data" in res) {
                 setRooms([...rooms, res.data as Room]);
                 setShowAdd(false);
-              } else alert((res as any).error || "Failed");
+                toast.showToast("Room created successfully", "success");
+              } else {
+                toast.showToast(res.error || "Failed to create room", "error");
+              }
             }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-3 items-end"
           >

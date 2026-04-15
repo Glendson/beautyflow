@@ -44,7 +44,7 @@ export const FormSelect = React.forwardRef<
         id={id}
         name={name}
         value={value}
-        onChange={(e) => onChange?.(e.target.value as any)}
+        onChange={(e) => onChange?.(e.target.value)}
         onBlur={onBlur}
         disabled={disabled}
         required={required}

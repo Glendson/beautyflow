@@ -71,7 +71,7 @@ export default function EmployeesPage() {
         setModalOpen(false);
         fetchEmployees(currentPage);
       } else {
-        console.error("Erro ao criar profissional:", result.error);
+        logger.error("Erro ao criar profissional:", result.error);
       }
     } finally {
       setIsSubmitting(false);
@@ -95,7 +95,7 @@ export default function EmployeesPage() {
         setEmployeeToDelete(null);
         fetchEmployees(currentPage);
       } else {
-        console.error("Erro ao deletar profissional:", result.error);
+        logger.error("Erro ao deletar profissional:", result.error);
       }
     } finally {
       setIsDeleting(false);

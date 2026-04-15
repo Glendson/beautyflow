@@ -93,7 +93,7 @@ export default function AppointmentsPage() {
         setModalOpen(false);
         fetchAppointments(currentPage);
       } else {
-        console.error("Erro ao criar agendamento:", result.error);
+        logger.error("Erro ao criar agendamento:", result.error);
       }
     } finally {
       setIsSubmitting(false);
@@ -119,7 +119,7 @@ export default function AppointmentsPage() {
         setAppointmentToDelete(null);
         fetchAppointments(currentPage);
       } else {
-        console.error("Erro ao deletar agendamento:", result.error);
+        logger.error("Erro ao deletar agendamento:", result.error);
       }
     } finally {
       setIsDeleting(false);

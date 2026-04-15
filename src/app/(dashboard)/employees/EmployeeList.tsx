@@ -58,7 +58,10 @@ export default function EmployeeList({
               if (res.success && "data" in res) {
                 setEmployees([...employees, res.data as Employee]);
                 setShowAdd(false);
-              } else alert((res as any).error || "Failed");
+                toast.showToast("Employee created successfully", "success");
+              } else {
+                toast.showToast(res.error || "Failed to create employee", "error");
+              }
             }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 items-start"
           >

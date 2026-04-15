@@ -4,9 +4,36 @@ import { EmployeeUseCases } from "@/application/employee/EmployeeUseCases";
 import { ServiceUseCases } from "@/application/service/ServiceUseCases";
 import { Appointment } from "@/domain/appointment/Appointment";
 import { Service } from "@/domain/service/Service";
+import { Client } from "@/domain/client/Client";
+import { Employee } from "@/domain/employee/Employee";
+import { PaginatedResult } from "@/lib/pagination";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Type guards for extracting data from paginated results
+ */
+function isPaginatedResult<T>(data: unknown): data is PaginatedResult<T> {
+  return typeof data === 'object' && data !== null && 'data' in data && 'total' in data;
+}
+
+function isArray<T>(data: unknown): data is T[] {
+  return Array.isArray(data);
+}
+
+/**
+ * Extract data safely from result, handling both paginated and array responses
+ */
+function extractData<T>(data: unknown): T[] {
+  if (isPaginatedResult<T>(data)) {
+    return (data as PaginatedResult<T>).data;
+  }
+  if (isArray<T>(data)) {
+    return data as T[];
+  }
+  return [];
+}
 
 export default async function DashboardPage() {
   // Calculate date range for relevant data
@@ -34,35 +61,16 @@ export default async function DashboardPage() {
     EmployeeUseCases.getEmployeesPaginated?.(1, 50) || EmployeeUseCases.getEmployees(),
   ]);
 
-  // Extract data from paginated results
-  const appointments = !aptRes.success 
-    ? [] 
-    : (aptRes.data && typeof aptRes.data === 'object' && 'data' in aptRes.data)
-      ? (aptRes.data as any).data
-      : Array.isArray(aptRes.data) ? aptRes.data : [];
-    
-  const clients = !cliRes.success 
-    ? [] 
-    : (cliRes.data && typeof cliRes.data === 'object' && 'data' in cliRes.data)
-      ? (cliRes.data as any).data
-      : Array.isArray(cliRes.data) ? cliRes.data : [];
-    
-  const services = !srvRes.success 
-    ? [] 
-    : (srvRes.data && typeof srvRes.data === 'object' && 'data' in srvRes.data)
-      ? (srvRes.data as any).data
-      : Array.isArray(srvRes.data) ? srvRes.data : [];
-    
-  const employees = !empRes.success 
-    ? [] 
-    : (empRes.data && typeof empRes.data === 'object' && 'data' in empRes.data)
-      ? (empRes.data as any).data
-      : Array.isArray(empRes.data) ? empRes.data : [];
+  // Extract data from results using type guards (no 'as any' needed)
+  const appointments: Appointment[] = aptRes.success ? extractData(aptRes.data) : [];
+  const clients: Client[] = cliRes.success ? extractData(cliRes.data) : [];
+  const services: Service[] = srvRes.success ? extractData(srvRes.data) : [];
+  const employees: Employee[] = empRes.success ? extractData(empRes.data) : [];
 
   const upcomingAppointments = appointments.filter(
-    (a: Appointment) => new Date(a.start_time) >= today && a.status === "scheduled"
+    (a) => new Date(a.start_time) >= today && a.status === "scheduled"
   );
-  const todaysAppointments = upcomingAppointments.filter((a: Appointment) => {
+  const todaysAppointments = upcomingAppointments.filter((a) => {
     const d = new Date(a.start_time);
     return (
       d.getDate() === today.getDate() &&

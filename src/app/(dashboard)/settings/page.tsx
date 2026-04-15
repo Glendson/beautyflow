@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge } from "@/components/ui";
 import { Save, Bell, Lock, CreditCard, LogOut, AlertCircle, CheckCircle } from "lucide-react";
+import { logger } from "@/lib/logger";
 import { updateClinicAction, getClinicAction } from "@/app/(auth)/actions";
 import { Clinic } from "@/domain/clinic/Clinic";
 
@@ -24,16 +25,16 @@ export default function SettingsPage() {
         if (result.success && result.data) {
           setClinic(result.data);
           setClinicName(result.data.name);
-          console.log("✅ [SETTINGS] Clinic data loaded:", result.data.name);
+          logger.info("[SETTINGS] Clinic data loaded:", result.data.name);
         } else {
-          console.error("❌ [SETTINGS] Failed to load clinic:", result.error);
+          logger.error("[SETTINGS] Failed to load clinic:", result.error);
           setMessage({
             type: "error",
             text: "Não foi possível carregar as configurações da clínica",
           });
         }
       } catch (error) {
-        console.error("❌ [SETTINGS] Error loading clinic:", error);
+        logger.error("[SETTINGS] Error loading clinic:", error);
         setMessage({
           type: "error",
           text: "Erro ao carregar configurações",
@@ -64,16 +65,16 @@ export default function SettingsPage() {
           type: "success",
           text: "Configurações salvas com sucesso!",
         });
-        console.log("✅ [SETTINGS] Changes saved successfully");
+        logger.info("[SETTINGS] Changes saved successfully");
       } else {
         setMessage({
           type: "error",
           text: result.error || "Erro ao salvar as configurações",
         });
-        console.error("❌ [SETTINGS] Save failed:", result.error);
+        logger.error("[SETTINGS] Save failed:", result.error);
       }
     } catch (error) {
-      console.error("❌ [SETTINGS] Error saving:", error);
+      logger.error("[SETTINGS] Error saving:", error);
       setMessage({
         type: "error",
         text: "Erro inesperado ao salvar configurações",
@@ -87,7 +88,7 @@ export default function SettingsPage() {
     if (clinic) {
       setClinicName(clinic.name);
       setMessage(null);
-      console.log("↩️ [SETTINGS] Changes discarded");
+      logger.info("[SETTINGS] Changes discarded");
     }
   };
 

@@ -69,7 +69,7 @@ export class AppointmentUseCases {
       endDate
     });
 
-    if (!metricsResult.success) return metricsResult as any;
+    if (!metricsResult.success) return metricsResult;
 
     const appointments = metricsResult.data?.data || [];
     
@@ -98,7 +98,7 @@ export class AppointmentUseCases {
 
     // 1. Validate Working Hours
     const hwResult = AppointmentValidator.validateWorkingHours(data.start_time, data.end_time);
-    if (!hwResult.success) return hwResult as any;
+    if (!hwResult.success) return hwResult;
 
     // 2. Fetch existing appointments for the day to check overlap
     const startOfDay = new Date(data.start_time);
@@ -107,11 +107,11 @@ export class AppointmentUseCases {
     endOfDay.setHours(23, 59, 59, 999);
 
     const existingResult = await repository.findByDateRange(clinicId, startOfDay, endOfDay);
-    if (!existingResult.success) return existingResult as any;
+    if (!existingResult.success) return existingResult;
 
     // 3. Validate Overlap
     const overlapResult = AppointmentValidator.validateOverlap(data, existingResult.data!);
-    if (!overlapResult.success) return overlapResult as any;
+    if (!overlapResult.success) return overlapResult;
 
     // 4. Create
     return repository.create({

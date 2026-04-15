@@ -31,16 +31,18 @@ export default function AppointmentList({
   const [appointments, setAppointments] = useState(initialAppointments);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const toast = useToast();
 
   const handleStatusChange = async (id: string, status: string) => {
     setLoadingId(id);
-    const res = (await updateAppointmentStatusAction(id, status)) as any;
+    const res = await updateAppointmentStatusAction(id, status);
     if (res.success && res.data) {
       setAppointments((prev) =>
-        prev.map((a) => (a.id === id ? (res.data as Appointment) : a))
+        prev.map((a) => (a.id === id ? res.data : a))
       );
+      toast.showToast("Appointment status updated", "success");
     } else {
-      alert("Failed to update status");
+      toast.showToast("Failed to update status", "error");
     }
     setLoadingId(null);
   };
@@ -80,17 +82,20 @@ export default function AppointmentList({
         <div className="animate-slide-down border-b border-gray-100 bg-gray-50/30 p-6">
           <form
             action={async (formData) => {
-              const res = (await createAppointmentAction(formData)) as any;
+              const res = await createAppointmentAction(formData);
               if (res.success && res.data) {
                 setAppointments(
-                  [...appointments, res.data as Appointment].sort(
+                  [...appointments, res.data].sort(
                     (a, b) =>
                       new Date(a.start_time).getTime() -
                       new Date(b.start_time).getTime()
                   )
                 );
                 setShowAdd(false);
-              } else alert(res.error || "Failed");
+                toast.showToast("Appointment created successfully", "success");
+              } else {
+                toast.showToast(res.error || "Failed to create appointment", "error");
+              }
             }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >

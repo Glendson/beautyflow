@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Service } from "@/domain/service/Service";
 import { createServiceAction, deleteServiceAction } from "./actions";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ServiceList({ initialServices }: { initialServices: Service[] }) {
+  const toast = useToast();
   const [services, setServices] = useState(initialServices);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -13,8 +15,12 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
     if (!confirm("Are you sure you want to remove this service?")) return;
     setLoadingId(id);
     const res = await deleteServiceAction(id);
-    if (res.success) setServices((prev) => prev.filter((s) => s.id !== id));
-    else alert("Failed to delete service");
+    if (res.success) {
+      setServices((prev) => prev.filter((s) => s.id !== id));
+      toast.showToast("Service deleted successfully", "success");
+    } else {
+      toast.showToast("Failed to delete service", "error");
+    }
     setLoadingId(null);
   };
 
@@ -49,7 +55,10 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
               if (res.success && "data" in res) {
                 setServices([...services, res.data as Service]);
                 setShowAdd(false);
-              } else alert((res as any).error || "Failed");
+                toast.showToast("Service created successfully", "success");
+              } else {
+                toast.showToast(res.error || "Failed to create service", "error");
+              }
             }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 items-end"
           >

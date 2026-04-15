@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
-import { Plus, Search, DollarSign, Edit, Trash2 } from "lucide-react";
-import { ServiceModal, ServiceFormData, DeleteConfirmationModal } from "@/components/modals";
+import { Plus, Search, DollarSign, Edit, Trash2 } from "lucide-react";import { logger } from "@/lib/logger";import { ServiceModal, ServiceFormData, DeleteConfirmationModal } from "@/components/modals";
 import { listServicesAction, createServiceAction, deleteServiceAction } from "@/app/(auth)/actions";
 import { Service } from "@/domain/service/Service";
 import { PaginatedResult } from "@/lib/pagination";
@@ -76,7 +75,7 @@ export default function ServicesPage() {
         setModalOpen(false);
         fetchServices(currentPage);
       } else {
-        console.error("Erro ao criar serviço:", result.error);
+        logger.error("Erro ao criar serviço:", result.error);
       }
     } finally {
       setIsSubmitting(false);
@@ -100,7 +99,7 @@ export default function ServicesPage() {
         setServiceToDelete(null);
         fetchServices(currentPage);
       } else {
-        console.error("Erro ao deletar serviço:", result.error);
+        logger.error("Erro ao deletar serviço:", result.error);
       }
     } finally {
       setIsDeleting(false);

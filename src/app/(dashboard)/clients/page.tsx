@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Avatar, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
 import { Plus, Search, Phone, Mail, Edit, Trash2 } from "lucide-react";
+import { logger } from "@/lib/logger";
 import { ClientModal, ClientFormData, DeleteConfirmationModal } from "@/components/modals";
 import { listClientsAction, createClientAction, deleteClientAction } from "@/app/(auth)/actions";
 import { Client } from "@/domain/client/Client";
@@ -81,7 +82,7 @@ export default function ClientsPage() {
         setModalOpen(false);
         fetchClients(currentPage);
       } else {
-        console.error("Erro ao criar cliente:", result.error);
+        logger.error("Erro ao criar cliente:", result.error);
       }
     } finally {
       setIsSubmitting(false);
@@ -107,7 +108,7 @@ export default function ClientsPage() {
         setClientToDelete(null);
         fetchClients(currentPage);
       } else {
-        console.error("Erro ao deletar cliente:", result.error);
+        logger.error("Erro ao deletar cliente:", result.error);
       }
     } finally {
       setIsDeleting(false);

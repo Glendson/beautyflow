@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Client } from "@/domain/client/Client";
 import { createClientAction, deleteClientAction } from "./actions";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ClientList({ initialClients }: { initialClients: Client[] }) {
   const [clients, setClients] = useState(initialClients);
@@ -52,7 +53,10 @@ export default function ClientList({ initialClients }: { initialClients: Client[
               if (res.success && "data" in res) {
                 setClients([...clients, res.data as Client]);
                 setShowAdd(false);
-              } else alert((res as any).error || "Failed");
+                toast.showToast("Client created successfully", "success");
+              } else {
+                toast.showToast(res.error || "Failed to create client", "error");
+              }
             }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-3"
           >
