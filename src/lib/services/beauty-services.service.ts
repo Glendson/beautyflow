@@ -47,7 +47,7 @@ export const ServiceService = {
   async create(data: {
     category_id: string;
     name: string;
-    duration_minutes: number;
+    duration: number;
     price: number;
     is_active?: boolean;
   }): Promise<Result<Service>> {
@@ -61,7 +61,7 @@ export const ServiceService = {
     id: string,
     data: Partial<{
       name: string;
-      duration_minutes: number;
+      duration: number;
       price: number;
       is_active: boolean;
       category_id: string;
@@ -102,6 +102,6 @@ export const ServiceService = {
    * Update service duration
    */
   async updateDuration(id: string, durationMinutes: number): Promise<Result<Service>> {
-    return ServiceUseCases.updateService(id, { duration_minutes: durationMinutes });
+    return ServiceUseCases.updateService(id, { duration: durationMinutes });
   },
 };

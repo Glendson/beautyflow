@@ -4,17 +4,18 @@ import { Result } from "@/lib/result";
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class ClinicRepository implements IClinicRepository {
+  // Explicit column selection: clinics table only has id, name, slug, created_at
+  private readonly defaultColumns = 'id,name,slug,created_at';
+
   async findById(id: string): Promise<Result<Clinic>> {
     return this.findByIdDirect(id);
   }
 
   async findByIdDirect(id: string): Promise<Result<Clinic>> {
     const supabase = await createClient();
-    // Using wildcard select for clinics table due to schema version variations
-    // This is safe since clinics are filtered by RLS and table is small
     const { data, error } = await supabase
       .from("clinics")
-      .select()
+      .select(this.defaultColumns)
       .eq("id", id)
       .single();
 
@@ -22,7 +23,7 @@ export class ClinicRepository implements IClinicRepository {
       return Result.fail(error?.message || "Clinic not found");
     }
 
-    return Result.ok(this.mapToEntity(data as DBClinic));
+    return Result.ok(this.mapToEntity(data as unknown as DBClinic));
   }
 
   async findAll(): Promise<Result<Clinic[]>> {
@@ -36,21 +37,16 @@ export class ClinicRepository implements IClinicRepository {
       .from("clinics")
       .insert({
         name: entity.name!,
-        email: entity.email,
-        phone: entity.phone,
-        address: entity.address,
-        working_hours_start: entity.working_hours_start || "08:00",
-        working_hours_end: entity.working_hours_end || "18:00",
-        logo_url: entity.logo_url || null,
+        slug: entity.slug!
       })
-      .select()
+      .select(this.defaultColumns)
       .single();
 
     if (error || !data) {
       return Result.fail(error?.message || "Failed to create clinic");
     }
 
-    return Result.ok(this.mapToEntity(data as DBClinic));
+    return Result.ok(this.mapToEntity(data as unknown as DBClinic));
   }
 
   async update(
@@ -60,28 +56,23 @@ export class ClinicRepository implements IClinicRepository {
   ): Promise<Result<Clinic>> {
     const supabase = await createClient();
 
-    // Build update payload - only include fields that are being updated
+    // Build update payload - only include fields that exist in database
     const updatePayload: Partial<DBClinic> = {};
     if (data.name !== undefined) updatePayload.name = data.name;
-    if (data.email !== undefined) updatePayload.email = data.email as any;
-    if (data.phone !== undefined) updatePayload.phone = data.phone as any;
-    if (data.address !== undefined) updatePayload.address = data.address as any;
-    if (data.working_hours_start !== undefined) updatePayload.working_hours_start = data.working_hours_start as any;
-    if (data.working_hours_end !== undefined) updatePayload.working_hours_end = data.working_hours_end as any;
-    if (data.logo_url !== undefined) updatePayload.logo_url = data.logo_url as any;
+    if (data.slug !== undefined) updatePayload.slug = data.slug;
 
     const { data: updatedData, error } = await supabase
       .from("clinics")
       .update(updatePayload)
       .eq("id", id)
-      .select()
+      .select(this.defaultColumns)
       .single();
 
     if (error || !updatedData) {
       return Result.fail(error?.message || "Failed to update clinic");
     }
 
-    return Result.ok(this.mapToEntity(updatedData as DBClinic));
+    return Result.ok(this.mapToEntity(updatedData as unknown as DBClinic));
   }
 
   async delete(id: string): Promise<Result<void>> {
@@ -100,14 +91,7 @@ export class ClinicRepository implements IClinicRepository {
       id: data.id,
       name: data.name,
       slug: data.slug,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
-      working_hours_start: data.working_hours_start,
-      working_hours_end: data.working_hours_end,
-      logo_url: data.logo_url || null,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
+      created_at: data.created_at
     };
   }
 }
@@ -116,12 +100,5 @@ interface DBClinic {
   id: string;
   name: string;
   slug: string;
-  email: string;
-  phone: string;
-  address: string;
-  working_hours_start: string;
-  working_hours_end: string;
-  logo_url?: string | null;
   created_at: string;
-  updated_at: string;
 }

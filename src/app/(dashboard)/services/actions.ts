@@ -15,7 +15,7 @@ export async function createServiceAction(formData: FormData) {
 
   const result = await ServiceService.create({
     name,
-    duration_minutes: duration,
+    duration: duration,
     category_id,
     price
   });

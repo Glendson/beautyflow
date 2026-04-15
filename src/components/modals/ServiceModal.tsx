@@ -5,7 +5,7 @@ import { FormInput, FormSelect, FormCheckbox, FormTextarea } from '../forms';
 export interface ServiceFormData {
   name: string;
   description?: string;
-  durationMinutes: number;
+  duration: number;
   price: number;
   categoryId: string;
   isActive: boolean;
@@ -35,7 +35,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
   const [formData, setFormData] = useState<ServiceFormData>({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    durationMinutes: initialData?.durationMinutes || 60,
+    duration: initialData?.duration || 60,
     price: initialData?.price || 0,
     categoryId: initialData?.categoryId || '',
     isActive: initialData?.isActive !== false,
@@ -50,8 +50,8 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
       newErrors.name = 'Nome é obrigatório';
     }
 
-    if (formData.durationMinutes < 15) {
-      newErrors.durationMinutes = 'Duração mínima é 15 minutos';
+    if (formData.duration < 15) {
+      newErrors.duration = 'Duração mínima é 15 minutos';
     }
 
     if (formData.price < 0) {
@@ -108,17 +108,17 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
         />
         <div className="grid grid-cols-2 gap-3">
           <FormInput
-            name="durationMinutes"
+            name="duration"
             label="Duração (min)"
             type="number"
-            value={formData.durationMinutes}
+            value={formData.duration}
             min={15}
             required
-            error={errors.durationMinutes}
+            error={errors.duration}
             onChange={(value) =>
               setFormData({
                 ...formData,
-                durationMinutes: parseInt(value) || 60,
+                duration: parseInt(value) || 60,
               })
             }
           />

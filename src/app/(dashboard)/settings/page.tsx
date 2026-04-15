@@ -9,11 +9,6 @@ import { Clinic } from "@/domain/clinic/Clinic";
 export default function SettingsPage() {
   const [clinic, setClinic] = useState<Clinic | null>(null);
   const [clinicName, setClinicName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [working_hours_start, setWorkingHoursStart] = useState("08:00");
-  const [working_hours_end, setWorkingHoursEnd] = useState("18:00");
   const [notifications, setNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [currentPlan] = useState("pro");
@@ -29,11 +24,6 @@ export default function SettingsPage() {
         if (result.success && result.data) {
           setClinic(result.data);
           setClinicName(result.data.name);
-          setEmail(result.data.email || "");
-          setPhone(result.data.phone || "");
-          setAddress(result.data.address || "");
-          setWorkingHoursStart(result.data.working_hours_start || "08:00");
-          setWorkingHoursEnd(result.data.working_hours_end || "18:00");
           console.log("✅ [SETTINGS] Clinic data loaded:", result.data.name);
         } else {
           console.error("❌ [SETTINGS] Failed to load clinic:", result.error);
@@ -63,11 +53,6 @@ export default function SettingsPage() {
     try {
       const updateData: Partial<Clinic> = {
         name: clinicName,
-        email,
-        phone,
-        address,
-        working_hours_start,
-        working_hours_end,
       };
 
       console.log("💾 [SETTINGS] Saving clinic changes:", updateData);
@@ -101,11 +86,6 @@ export default function SettingsPage() {
   const handleDiscard = () => {
     if (clinic) {
       setClinicName(clinic.name);
-      setEmail(clinic.email || "");
-      setPhone(clinic.phone || "");
-      setAddress(clinic.address || "");
-      setWorkingHoursStart(clinic.working_hours_start || "08:00");
-      setWorkingHoursEnd(clinic.working_hours_end || "18:00");
       setMessage(null);
       console.log("↩️ [SETTINGS] Changes discarded");
     }
@@ -159,53 +139,16 @@ export default function SettingsPage() {
             onChange={(e) => setClinicName(e.target.value)}
             disabled={isLoading}
           />
-          
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-          />
-          
-          <Input
-            label="Telefone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            disabled={isLoading}
-          />
-          
-          <Input
-            label="Endereço"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            disabled={isLoading}
-          />
         </div>
       </Card>
 
-      {/* Working Hours */}
+      {/* Clinic Hours - Note: Coming soon feature */}
+      {/* 
       <Card padding="lg" elevation="sm">
         <h2 className="text-xl font-bold text-slate-900 mb-6">Horário de Funcionamento</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Horário de Abertura"
-            type="time"
-            value={working_hours_start}
-            onChange={(e) => setWorkingHoursStart(e.target.value)}
-            disabled={isLoading}
-          />
-          
-          <Input
-            label="Horário de Fechamento"
-            type="time"
-            value={working_hours_end}
-            onChange={(e) => setWorkingHoursEnd(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
+        <p className="text-neutral-700 text-sm mb-4">Funcionalidade em breve</p>
       </Card>
+      */}
 
       {/* Notifications */}
       <Card padding="lg" elevation="sm">

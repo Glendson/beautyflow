@@ -113,7 +113,7 @@ export class PublicBookingService {
       // Get service duration
       const { data: service, error: serviceError } = await client
         .from("services")
-        .select("duration_minutes")
+        .select("duration")
         .eq("id", serviceId)
         .single();
 
@@ -125,7 +125,7 @@ export class PublicBookingService {
       }
 
       // Type guard for proper TypeScript inference
-      const serviceDuration = ((service as unknown) as { duration_minutes: number }).duration_minutes || 60;
+      const serviceDuration = ((service as unknown) as { duration: number }).duration || 60;
 
       // Get existing appointments for this employee on this date
       const { data: appointments, error: appointmentError } = await client

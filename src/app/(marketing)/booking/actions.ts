@@ -131,11 +131,11 @@ export async function createBookingAction(data: BookingData) {
     // Get service duration
     const { data: service } = await supabase
       .from('services')
-      .select('duration_minutes')
+      .select('duration')
       .eq('id', data.serviceId)
       .single();
 
-    const durationMinutes = (service as any)?.duration_minutes || 60;
+    const durationMinutes = (service as any)?.duration || 60;
     const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
 
     // Check availability one more time
@@ -209,7 +209,7 @@ export async function getBookingConfirmationAction(appointmentId: string) {
         employee_id,
         clinic_id,
         clients(id, name, email, phone),
-        services(id, name, price, duration_minutes),
+        services(id, name, price, duration),
         employees(id, name),
         clinics(id, name, phone, address)
       `

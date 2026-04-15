@@ -40,7 +40,7 @@ export interface Service {
   name: string;
   description?: string;
   category: string;
-  duration_minutes: number;
+  duration: number;
   price: number;
   createdAt: Date;
   updatedAt: Date;

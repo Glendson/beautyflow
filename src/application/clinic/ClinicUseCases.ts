@@ -21,19 +21,6 @@ export class ClinicUseCases {
       return Result.fail("Clinic name cannot be empty");
     }
 
-    if (data.email && !this.isValidEmail(data.email)) {
-      return Result.fail("Invalid email format");
-    }
-
-    if (data.phone && data.phone.trim().length === 0) {
-      return Result.fail("Phone cannot be empty");
-    }
-
     return repository.update(clinicId, data, clinicId);
-  }
-
-  private static isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 }

@@ -11,5 +11,5 @@ export interface Appointment {
   end_time: Date;
   status: AppointmentStatus;
   created_at?: Date;
-  updated_at?: Date;
+  notes?: string;
 }

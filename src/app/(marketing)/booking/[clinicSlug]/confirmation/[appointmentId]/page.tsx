@@ -108,7 +108,7 @@ export default async function ConfirmationPage({
                 <div>
                   <p className="text-sm text-neutral-600 font-medium">Duração</p>
                   <p className="text-lg font-semibold text-neutral-900">
-                    {service.duration_minutes} minutos
+                    {service.duration} minutos
                   </p>
                 </div>
               </div>
@@ -164,6 +164,8 @@ export default async function ConfirmationPage({
           <div className="space-y-4 border-t pt-6 bg-primary-light rounded-lg p-4">
             <h2 className="text-lg font-bold text-neutral-900">Clínica</h2>
             <p className="text-neutral-900 font-semibold">{clinic.name}</p>
+            {/* Extended clinic info coming soon */}
+            {/* 
             {clinic.address && (
               <p className="text-neutral-700 text-sm">{clinic.address}</p>
             )}
@@ -172,6 +174,7 @@ export default async function ConfirmationPage({
                 Telefone: {clinic.phone}
               </p>
             )}
+            */}
           </div>
 
           {/* Important Note */}

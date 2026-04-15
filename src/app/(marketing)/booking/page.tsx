@@ -62,7 +62,8 @@ export default async function BookingHomePage() {
                         {clinic.name}
                       </h3>
 
-                      {/* Clinic Info */}
+                      {/* Clinic Info - Note: Extended info coming soon */}
+                      {/* 
                       <div className="space-y-2 text-sm text-neutral-700 mb-4">
                         {clinic.address && (
                           <div className="flex items-start gap-2">
@@ -85,13 +86,16 @@ export default async function BookingHomePage() {
                           </div>
                         )}
                       </div>
+                      */}
 
-                      {/* Description */}
+                      {/* Description - Coming soon */}
+                      {/* 
                       {clinic.description && (
                         <p className="text-sm text-neutral-600 mb-4 line-clamp-2">
                           {clinic.description}
                         </p>
                       )}
+                      */}
 
                       {/* CTA Button */}
                       <Button

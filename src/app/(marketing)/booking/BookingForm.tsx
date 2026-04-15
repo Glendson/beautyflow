@@ -231,7 +231,7 @@ export function BookingForm({
                     {service.name}
                   </div>
                   <div className="text-sm text-neutral-700 mt-1">
-                    {service.duration_minutes || service.duration || "N/A"} minutos • R${" "}
+                    {service.duration || "N/A"} minutos • R${" "}
                     {service.price || service.price === 0 ? service.price.toFixed(2).replace(".", ",") : "N/A"}
                   </div>
                   {(service.description) && (

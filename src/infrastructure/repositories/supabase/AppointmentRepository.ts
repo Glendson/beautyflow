@@ -6,7 +6,8 @@ import { createClient } from "@/infrastructure/supabase/server";
 
 export class AppointmentRepository implements IAppointmentRepository {
   // Explicit column selection to avoid N+1 queries and unnecessary data transfer
-  private readonly defaultColumns = 'id,clinic_id,client_id,service_id,employee_id,room_id,start_time,end_time,status,created_at';
+  // Schema: appointments has id, clinic_id, client_id, service_id, employee_id, room_id, start_time, end_time, status, created_at, notes
+  private readonly defaultColumns = 'id,clinic_id,client_id,service_id,employee_id,room_id,start_time,end_time,status,created_at,notes';
 
   async findById(id: string, clinicId: string): Promise<Result<Appointment>> {
     const supabase = await createClient();
@@ -150,8 +151,9 @@ export class AppointmentRepository implements IAppointmentRepository {
         start_time: entity.start_time!.toISOString(),
         end_time: entity.end_time!.toISOString(),
         status: entity.status || 'scheduled',
+        notes: entity.notes || null
       })
-      .select()
+      .select(this.defaultColumns)
       .single();
 
     if (error || !data) return Result.fail(error?.message || "Failed to create appointment");
@@ -170,11 +172,11 @@ export class AppointmentRepository implements IAppointmentRepository {
         start_time: entity.start_time?.toISOString(),
         end_time: entity.end_time?.toISOString(),
         status: entity.status,
-        updated_at: new Date().toISOString()
+        notes: entity.notes
       })
       .eq('id', id)
       .eq('clinic_id', clinicId)
-      .select()
+      .select(this.defaultColumns)
       .single();
 
     if (error || !data) return Result.fail(error?.message || "Failed to update appointment");
@@ -205,7 +207,7 @@ export class AppointmentRepository implements IAppointmentRepository {
       end_time: new Date(data.end_time),
       status: (data.status ?? 'scheduled') as AppointmentStatus,
       created_at: data.created_at ? new Date(data.created_at) : undefined,
-      updated_at: data.updated_at ? new Date(data.updated_at) : undefined
+      notes: data.notes || undefined
     };
   }
 }
@@ -221,6 +223,6 @@ interface DBAppointment {
   end_time: string;
   status: string | null;
   created_at?: string | null;
-  updated_at?: string | null;
+  notes?: string | null;
 }
 

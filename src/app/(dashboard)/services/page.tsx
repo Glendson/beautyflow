@@ -66,7 +66,7 @@ export default function ServicesPage() {
       const result = await createServiceAction({
         name: data.name,
         description: data.description,
-        duration_minutes: data.durationMinutes,
+        duration: data.duration,
         price: data.price,
         category_id: data.categoryId,
         is_active: data.isActive,
@@ -177,7 +177,7 @@ export default function ServicesPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>{service.duration_minutes} min</TableCell>
+                      <TableCell>{service.duration} min</TableCell>
                       <TableCell>
                         <Badge variant={service.is_active ? "success" : "default"}>
                           {service.is_active ? "Ativo" : "Inativo"}
@@ -220,7 +220,7 @@ export default function ServicesPage() {
             ? {
                 name: selectedService.name,
                 description: selectedService.description,
-                durationMinutes: selectedService.duration_minutes,
+                duration: selectedService.duration,
                 price: selectedService.price,
                 categoryId: selectedService.category_id || undefined,
                 isActive: selectedService.is_active,
