@@ -19,9 +19,12 @@ export default async function DashboardPage() {
   // Fetch paginated data with limits to improve performance
   // Instead of loading ALL records, we load only what's needed for the dashboard
   const [aptRes, cliRes, srvRes, empRes] = await Promise.all([
-    // Get appointments for next 7 days (page 1, 20 per page)
+    // Get appointments for next 7 days (page 1, 20 per page) with date range filter
+    // PERFORMANCE: date range is critical - prevents scanning all appointments
     AppointmentUseCases.getAppointmentsPaginated(1, 20, { 
-      status: 'scheduled' 
+      status: 'scheduled',
+      startDate: today,
+      endDate: nextWeek
     }),
     // Get clients (page 1, 20 per page)
     ClientUseCases.getClientsPaginated(1, 20),
@@ -34,26 +37,26 @@ export default async function DashboardPage() {
   // Extract data from paginated results
   const appointments = !aptRes.success 
     ? [] 
-    : (aptRes.data && typeof aptRes.data === 'object' && 'items' in aptRes.data)
-      ? (aptRes.data as any).items
+    : (aptRes.data && typeof aptRes.data === 'object' && 'data' in aptRes.data)
+      ? (aptRes.data as any).data
       : Array.isArray(aptRes.data) ? aptRes.data : [];
     
   const clients = !cliRes.success 
     ? [] 
-    : (cliRes.data && typeof cliRes.data === 'object' && 'items' in cliRes.data)
-      ? (cliRes.data as any).items
+    : (cliRes.data && typeof cliRes.data === 'object' && 'data' in cliRes.data)
+      ? (cliRes.data as any).data
       : Array.isArray(cliRes.data) ? cliRes.data : [];
     
   const services = !srvRes.success 
     ? [] 
-    : (srvRes.data && typeof srvRes.data === 'object' && 'items' in srvRes.data)
-      ? (srvRes.data as any).items
+    : (srvRes.data && typeof srvRes.data === 'object' && 'data' in srvRes.data)
+      ? (srvRes.data as any).data
       : Array.isArray(srvRes.data) ? srvRes.data : [];
     
   const employees = !empRes.success 
     ? [] 
-    : (empRes.data && typeof empRes.data === 'object' && 'items' in empRes.data)
-      ? (empRes.data as any).items
+    : (empRes.data && typeof empRes.data === 'object' && 'data' in empRes.data)
+      ? (empRes.data as any).data
       : Array.isArray(empRes.data) ? empRes.data : [];
 
   const upcomingAppointments = appointments.filter(

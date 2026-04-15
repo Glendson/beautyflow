@@ -45,8 +45,8 @@ export const EmployeeService = {
     name: string;
     email: string;
     phone?: string;
-  }): Promise<Result<Employee>> {
-    return EmployeeUseCases.createEmployee(data);
+  }, serviceIds?: string[]): Promise<Result<Employee>> {
+    return EmployeeUseCases.createEmployee(data, serviceIds);
   },
 
   /**
@@ -86,29 +86,9 @@ export const EmployeeService = {
   },
 
   /**
-   * Assign services to an employee
-   */
-  async assignServices(
-    employeeId: string,
-    serviceIds: string[]
-  ): Promise<Result<void>> {
-    return EmployeeUseCases.assignServices(employeeId, serviceIds);
-  },
-
-  /**
    * Get services offered by an employee
    */
   async getServices(employeeId: string): Promise<Result<string[]>> {
     return EmployeeUseCases.getEmployeeServices(employeeId);
-  },
-
-  /**
-   * Check if employee can perform a service
-   */
-  async canPerformService(
-    employeeId: string,
-    serviceId: string
-  ): Promise<Result<boolean>> {
-    return EmployeeUseCases.canPerformService(employeeId, serviceId);
   },
 };

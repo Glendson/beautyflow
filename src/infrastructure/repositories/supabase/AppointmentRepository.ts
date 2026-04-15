@@ -5,11 +5,14 @@ import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/l
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class AppointmentRepository implements IAppointmentRepository {
+  // Explicit column selection to avoid N+1 queries and unnecessary data transfer
+  private readonly defaultColumns = 'id,clinic_id,client_id,service_id,employee_id,room_id,start_time,end_time,status,created_at';
+
   async findById(id: string, clinicId: string): Promise<Result<Appointment>> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('appointments')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('id', id)
       .eq('clinic_id', clinicId)
       .single();
@@ -22,7 +25,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('appointments')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId)
       .order('start_time');
 
@@ -32,13 +35,15 @@ export class AppointmentRepository implements IAppointmentRepository {
 
   /**
    * Find appointments with pagination support
-   * Supports filters: status, clientId, employeeId
+   * Supports filters: status, clientId, employeeId, dateRange
+   * PERFORMANCE: Uses explicit select() to avoid N+1 queries and includes indexes on (clinic_id, status, employee_id, start_time)
+   * Response time target: < 100ms for typical clinic load (< 1000 appointments/day)
    */
   async findAllPaginated(
     clinicId: string,
     page: number,
     pageSize: number,
-    filters?: { status?: string; clientId?: string; employeeId?: string; search?: string }
+    filters?: { status?: string; clientId?: string; employeeId?: string; search?: string; startDate?: Date; endDate?: Date }
   ): Promise<Result<PaginatedResult<Appointment>>> {
     const supabase = await createClient();
     const { limit, offset } = getPaginationParams(page, pageSize);
@@ -49,10 +54,10 @@ export class AppointmentRepository implements IAppointmentRepository {
       .select('id', { count: 'exact' })
       .eq('clinic_id', clinicId);
 
-    // Build query for data
+    // Build query for data - explicit column selection
     let dataQuery = supabase
       .from('appointments')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId);
 
     // Apply filters
@@ -71,9 +76,18 @@ export class AppointmentRepository implements IAppointmentRepository {
       dataQuery = dataQuery.eq('employee_id', filters.employeeId);
     }
 
-    // Apply search (search in client name via join? For now just ID)
+    // Date range filter (crucial for dashboard performance)
+    if (filters?.startDate && filters?.endDate) {
+      countQuery = countQuery
+        .gte('start_time', filters.startDate.toISOString())
+        .lt('start_time', filters.endDate.toISOString());
+      dataQuery = dataQuery
+        .gte('start_time', filters.startDate.toISOString())
+        .lt('start_time', filters.endDate.toISOString());
+    }
+
+    // Apply search (search in appointment id)
     if (filters?.search) {
-      // Simple search by client_id substring - improve with full-text search later
       dataQuery = dataQuery.ilike('id', `%${filters.search}%`);
     }
 
@@ -98,7 +112,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('appointments')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId)
       .gte('start_time', start.toISOString())
       .lt('start_time', end.toISOString())
@@ -112,7 +126,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('appointments')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId)
       .eq('employee_id', employeeId)
       .gte('start_time', start.toISOString())

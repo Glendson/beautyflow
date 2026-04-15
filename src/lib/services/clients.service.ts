@@ -42,8 +42,8 @@ export const ClientService = {
    */
   async create(data: {
     name: string;
-    email?: string;
-    phone?: string;
+    email: string | null;
+    phone: string | null;
     notes?: string;
   }): Promise<Result<Client>> {
     return ClientUseCases.createClient(data);
@@ -56,8 +56,8 @@ export const ClientService = {
     id: string,
     data: Partial<{
       name: string;
-      email?: string;
-      phone?: string;
+      email: string | null;
+      phone: string | null;
       notes?: string;
     }>
   ): Promise<Result<Client>> {
@@ -69,33 +69,5 @@ export const ClientService = {
    */
   async delete(id: string): Promise<Result<void>> {
     return ClientUseCases.deleteClient(id);
-  },
-
-  /**
-   * Search clients by name, email, or phone
-   */
-  async search(query: string): Promise<Result<Client[]>> {
-    return ClientUseCases.searchClients(query);
-  },
-
-  /**
-   * Get client by email
-   */
-  async getByEmail(email: string): Promise<Result<Client | null>> {
-    return ClientUseCases.getClientByEmail(email);
-  },
-
-  /**
-   * Get client by phone
-   */
-  async getByPhone(phone: string): Promise<Result<Client | null>> {
-    return ClientUseCases.getClientByPhone(phone);
-  },
-
-  /**
-   * Add notes to client profile
-   */
-  async addNotes(clientId: string, notes: string): Promise<Result<Client>> {
-    return ClientUseCases.updateClient(clientId, { notes });
   },
 };

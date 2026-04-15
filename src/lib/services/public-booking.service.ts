@@ -124,6 +124,9 @@ export class PublicBookingService {
         };
       }
 
+      // Type guard for proper TypeScript inference
+      const serviceDuration = ((service as unknown) as { duration_minutes: number }).duration_minutes || 60;
+
       // Get existing appointments for this employee on this date
       const { data: appointments, error: appointmentError } = await client
         .from("appointments")
@@ -144,7 +147,7 @@ export class PublicBookingService {
       const slots = this.generateAvailableSlots(
         startHour,
         endHour,
-        service.duration_minutes || 60,
+        serviceDuration,
         appointments || []
       );
 

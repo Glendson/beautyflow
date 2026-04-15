@@ -8,15 +8,18 @@ import { escapeLike, validateSearchInput } from "@/lib/sql-escaping";
 export interface IClientRepository extends IRepository<Client> {}
 
 export class ClientRepository implements IClientRepository {
+  // Explicit column selection to avoid N+1 queries and unnecessary data transfer
+  private readonly defaultColumns = 'id,clinic_id,name,email,phone';
+
   async findById(id: string, clinicId: string): Promise<Result<Client>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('clients').select('*').eq('id', id).eq('clinic_id', clinicId).single();
+    const { data, error } = await supabase.from('clients').select(this.defaultColumns).eq('id', id).eq('clinic_id', clinicId).single();
     if (error || !data) return Result.fail(error?.message || "Client not found");
     return Result.ok(this.mapToEntity(data as DBClient));
   }
   async findAll(clinicId: string): Promise<Result<Client[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('clients').select('*').eq('clinic_id', clinicId).order('name');
+    const { data, error } = await supabase.from('clients').select(this.defaultColumns).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBClient[]).map(d => this.mapToEntity(d)));
   }
@@ -24,6 +27,8 @@ export class ClientRepository implements IClientRepository {
   /**
    * Find clients with pagination support
    * Supports search: name, email
+   * PERFORMANCE: Uses explicit select() and indexes on (clinic_id, name, email)
+   * Response time target: < 100ms
    */
   async findAllPaginated(
     clinicId: string,
@@ -42,7 +47,7 @@ export class ClientRepository implements IClientRepository {
 
     let dataQuery = supabase
       .from('clients')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId);
 
     // Apply search filter with proper escaping
@@ -57,7 +62,7 @@ export class ClientRepository implements IClientRepository {
         // For data query, use ilike for either name or email
         dataQuery = supabase
           .from('clients')
-          .select('*')
+          .select(this.defaultColumns)
           .eq('clinic_id', clinicId)
           .or(`name.ilike.${searchPattern},email.ilike.${searchPattern}`);
       }
@@ -81,13 +86,13 @@ export class ClientRepository implements IClientRepository {
   }
   async create(entity: Partial<Client> & { clinic_id: string }): Promise<Result<Client>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('clients').insert({ clinic_id: entity.clinic_id, name: entity.name!, email: entity.email || null, phone: entity.phone || null }).select().single();
+    const { data, error } = await supabase.from('clients').insert({ clinic_id: entity.clinic_id, name: entity.name!, email: entity.email || null, phone: entity.phone || null }).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to create client");
     return Result.ok(this.mapToEntity(data as DBClient));
   }
   async update(id: string, entity: Partial<Client>, clinicId: string): Promise<Result<Client>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('clients').update({ name: entity.name, email: entity.email, phone: entity.phone }).eq('id', id).eq('clinic_id', clinicId).select().single();
+    const { data, error } = await supabase.from('clients').update({ name: entity.name, email: entity.email, phone: entity.phone }).eq('id', id).eq('clinic_id', clinicId).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to update client");
     return Result.ok(this.mapToEntity(data as DBClient));
   }

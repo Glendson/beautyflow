@@ -12,11 +12,7 @@ export async function createEmployeeAction(formData: FormData) {
   
   const serviceIds = serviceIdsRaw ? serviceIdsRaw.split(",") : [];
 
-  const result = await EmployeeService.create({ name, email, phone });
-  
-  if (result.success && serviceIds.length > 0) {
-    await EmployeeService.assignServices(result.data!.id, serviceIds);
-  }
+  const result = await EmployeeService.create({ name, email, phone }, serviceIds);
 
   if (result.success) revalidatePath("/employees");
   return result;

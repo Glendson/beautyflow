@@ -55,7 +55,6 @@ export const RoomService = {
     data: Partial<{
       name: string;
       type: "room" | "station";
-      is_active: boolean;
     }>
   ): Promise<Result<Room>> {
     return RoomUseCases.updateRoom(id, data);
@@ -66,37 +65,5 @@ export const RoomService = {
    */
   async delete(id: string): Promise<Result<void>> {
     return RoomUseCases.deleteRoom(id);
-  },
-
-  /**
-   * Deactivate a room
-   */
-  async deactivate(id: string): Promise<Result<Room>> {
-    return RoomUseCases.updateRoom(id, { is_active: false });
-  },
-
-  /**
-   * Activate a room
-   */
-  async activate(id: string): Promise<Result<Room>> {
-    return RoomUseCases.updateRoom(id, { is_active: true });
-  },
-
-  /**
-   * Get available rooms
-   */
-  async getAvailable(): Promise<Result<Room[]>> {
-    return RoomUseCases.getAvailableRooms();
-  },
-
-  /**
-   * Check if room is available at a specific time
-   */
-  async isAvailable(
-    roomId: string,
-    startTime: Date,
-    endTime: Date
-  ): Promise<Result<boolean>> {
-    return RoomUseCases.isRoomAvailable(roomId, startTime, endTime);
   },
 };

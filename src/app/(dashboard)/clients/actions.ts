@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 
 export async function createClientAction(formData: FormData) {
   const name = formData.get("name")?.toString();
-  const email = formData.get("email")?.toString() || undefined;
-  const phone = formData.get("phone")?.toString() || undefined;
+  const email = formData.get("email")?.toString() ?? null;
+  const phone = formData.get("phone")?.toString() ?? null;
 
   if (!name) return { success: false, error: "Name is required" };
 

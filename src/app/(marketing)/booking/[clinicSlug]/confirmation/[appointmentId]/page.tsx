@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getBookingConfirmationAction } from "../../../actions";
 import { Button, Card } from "@/components/ui";
+import type { Service, Employee, Clinic, Client, Appointment } from "@/types";
 
 interface ConfirmationPageProps {
   params: Promise<{
@@ -10,7 +11,7 @@ interface ConfirmationPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: ConfirmationPageProps) {
+export async function generateMetadata() {
   return {
     title: `Agendamento Confirmado | BeautyFlow`,
     description: `Seu agendamento foi confirmado com sucesso`,
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: ConfirmationPageProps) {
 export default async function ConfirmationPage({
   params,
 }: ConfirmationPageProps) {
-  const { clinicSlug, appointmentId } = await params;
+  const { appointmentId } = await params;
 
   // Fetch booking confirmation
   const result = await getBookingConfirmationAction(appointmentId);
@@ -29,23 +30,15 @@ export default async function ConfirmationPage({
     notFound();
   }
 
-  const { appointment, service: rawService, employee: rawEmployee, client, clinic: rawClinic } = result.data;
-  
-  const service = rawService as any;
-  const employee = rawEmployee as any;
-  const clinic = rawClinic as any;
-  
+  const { appointment, service: rawService, employee: rawEmployee, client: rawClient, clinic: rawClinic } = result.data;
+
   // Type guards for related entities
-  if (!service || typeof service !== 'object' || !('name' in service)) {
-    notFound();
-  }
-  if (!employee || typeof employee !== 'object' || !('name' in employee)) {
-    notFound();
-  }
-  if (!client || typeof client !== 'object') {
-    notFound();
-  }
-  if (!clinic || typeof clinic !== 'object' || !('name' in clinic)) {
+  const service = rawService as Service | null;
+  const employee = rawEmployee as Employee | null;
+  const client = rawClient as Client | null;
+  const clinic = rawClinic as Clinic | null;
+
+  if (!service || !employee || !client || !clinic) {
     notFound();
   }
 
@@ -62,7 +55,7 @@ export default async function ConfirmationPage({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-success-50 to-accent-50 py-12 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-linear-to-br from-success-50 to-accent-50 py-12 px-4 flex items-center justify-center">
       <div className="w-full max-w-2xl">
         {/* Success Header */}
         <div className="text-center mb-8">
@@ -115,7 +108,7 @@ export default async function ConfirmationPage({
                 <div>
                   <p className="text-sm text-neutral-600 font-medium">Duração</p>
                   <p className="text-lg font-semibold text-neutral-900">
-                    {(service as any)?.duration_minutes ?? '-'} minutos
+                    {service.duration_minutes} minutos
                   </p>
                 </div>
               </div>
@@ -125,19 +118,19 @@ export default async function ConfirmationPage({
                 <div>
                   <p className="text-sm text-neutral-600 font-medium">Serviço</p>
                   <p className="text-lg font-semibold text-neutral-900">
-                    {(service as any)?.name}
+                    {service.name}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-neutral-600 font-medium">Profissional</p>
                   <p className="text-lg font-semibold text-neutral-900">
-                    {(employee as any)?.name}
+                    {employee.name}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-neutral-600 font-medium">Valor</p>
                   <p className="text-lg font-bold text-primary">
-                    R$ {((service as any)?.price ?? 0).toFixed(2).replace(".", ",")}
+                    R$ {service.price.toFixed(2).replace(".", ",")}
                   </p>
                 </div>
               </div>
@@ -170,13 +163,13 @@ export default async function ConfirmationPage({
           {/* Clinic Info */}
           <div className="space-y-4 border-t pt-6 bg-primary-light rounded-lg p-4">
             <h2 className="text-lg font-bold text-neutral-900">Clínica</h2>
-            <p className="text-neutral-900 font-semibold">{(clinic as any)?.name}</p>
-            {(clinic as any)?.address && (
-              <p className="text-neutral-700 text-sm">{(clinic as any)?.address}</p>
+            <p className="text-neutral-900 font-semibold">{clinic.name}</p>
+            {clinic.address && (
+              <p className="text-neutral-700 text-sm">{clinic.address}</p>
             )}
-            {(clinic as any)?.phone && (
+            {clinic.phone && (
               <p className="text-neutral-700 text-sm">
-                Telefone: {(clinic as any)?.phone}
+                Telefone: {clinic.phone}
               </p>
             )}
           </div>

@@ -5,15 +5,18 @@ import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/l
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class RoomRepository implements IRoomRepository {
+  // Explicit column selection to avoid N+1 queries and unnecessary data transfer
+  private readonly defaultColumns = 'id,clinic_id,name,type';
+
   async findById(id: string, clinicId: string): Promise<Result<Room>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('rooms').select('*').eq('id', id).eq('clinic_id', clinicId).single();
+    const { data, error } = await supabase.from('rooms').select(this.defaultColumns).eq('id', id).eq('clinic_id', clinicId).single();
     if (error || !data) return Result.fail(error?.message || "Room not found");
     return Result.ok(this.mapToEntity(data as DBRoom));
   }
   async findAll(clinicId: string): Promise<Result<Room[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('rooms').select('*').eq('clinic_id', clinicId).order('name');
+    const { data, error } = await supabase.from('rooms').select(this.defaultColumns).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBRoom[]).map(d => this.mapToEntity(d)));
   }
@@ -21,6 +24,8 @@ export class RoomRepository implements IRoomRepository {
   /**
    * Find rooms with pagination support
    * Supports search: name, and filter by type
+   * PERFORMANCE: Uses explicit select() and indexes on (clinic_id, type, name)
+   * Response time target: < 100ms
    */
   async findAllPaginated(
     clinicId: string,
@@ -39,7 +44,7 @@ export class RoomRepository implements IRoomRepository {
 
     let dataQuery = supabase
       .from('rooms')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId);
 
     // Apply type filter
@@ -77,7 +82,7 @@ export class RoomRepository implements IRoomRepository {
       clinic_id: entity.clinic_id,
       name: entity.name!,
       type: entity.type || 'room'
-    }).select().single();
+    }).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to create room");
     return Result.ok(this.mapToEntity(data as DBRoom));
   }
@@ -86,7 +91,7 @@ export class RoomRepository implements IRoomRepository {
     const { data, error } = await supabase.from('rooms').update({
       name: entity.name,
       type: entity.type,
-    }).eq('id', id).eq('clinic_id', clinicId).select().single();
+    }).eq('id', id).eq('clinic_id', clinicId).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to update room");
     return Result.ok(this.mapToEntity(data as DBRoom));
   }

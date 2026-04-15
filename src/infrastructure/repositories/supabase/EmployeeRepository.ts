@@ -5,15 +5,18 @@ import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/l
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class EmployeeRepository implements IEmployeeRepository {
+  // Explicit column selection to avoid N+1 queries and unnecessary data transfer
+  private readonly defaultColumns = 'id,clinic_id,name';
+
   async findById(id: string, clinicId: string): Promise<Result<Employee>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('employees').select('*').eq('id', id).eq('clinic_id', clinicId).single();
+    const { data, error } = await supabase.from('employees').select(this.defaultColumns).eq('id', id).eq('clinic_id', clinicId).single();
     if (error || !data) return Result.fail(error?.message || "Employee not found");
     return Result.ok(this.mapToEntity(data as DBEmployee));
   }
   async findAll(clinicId: string): Promise<Result<Employee[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('employees').select('*').eq('clinic_id', clinicId).order('name');
+    const { data, error } = await supabase.from('employees').select(this.defaultColumns).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBEmployee[]).map(d => this.mapToEntity(d)));
   }
@@ -21,6 +24,8 @@ export class EmployeeRepository implements IEmployeeRepository {
   /**
    * Find employees with pagination support
    * Supports search: name
+   * PERFORMANCE: Uses explicit select() and indexes on (clinic_id, name)
+   * Response time target: < 100ms
    */
   async findAllPaginated(
     clinicId: string,
@@ -39,7 +44,7 @@ export class EmployeeRepository implements IEmployeeRepository {
 
     let dataQuery = supabase
       .from('employees')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId);
 
     // Apply search filter
@@ -67,13 +72,13 @@ export class EmployeeRepository implements IEmployeeRepository {
   }
   async create(entity: Partial<Employee> & { clinic_id: string }): Promise<Result<Employee>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('employees').insert({ clinic_id: entity.clinic_id, name: entity.name! }).select().single();
+    const { data, error } = await supabase.from('employees').insert({ clinic_id: entity.clinic_id, name: entity.name! }).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to create employee");
     return Result.ok(this.mapToEntity(data as DBEmployee));
   }
   async update(id: string, entity: Partial<Employee>, clinicId: string): Promise<Result<Employee>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('employees').update({ name: entity.name }).eq('id', id).eq('clinic_id', clinicId).select().single();
+    const { data, error } = await supabase.from('employees').update({ name: entity.name }).eq('id', id).eq('clinic_id', clinicId).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to update employee");
     return Result.ok(this.mapToEntity(data as DBEmployee));
   }

@@ -10,9 +10,11 @@ export class ClinicRepository implements IClinicRepository {
 
   async findByIdDirect(id: string): Promise<Result<Clinic>> {
     const supabase = await createClient();
+    // Using wildcard select for clinics table due to schema version variations
+    // This is safe since clinics are filtered by RLS and table is small
     const { data, error } = await supabase
       .from("clinics")
-      .select("*")
+      .select()
       .eq("id", id)
       .single();
 

@@ -73,8 +73,8 @@ export interface Client {
   id: string;
   clinic_id: string;
   name: string;
-  email?: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   date_of_birth?: Date;
   notes?: string;
   avatar_url?: string;

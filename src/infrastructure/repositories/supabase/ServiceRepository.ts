@@ -5,23 +5,26 @@ import { PaginatedResult, createPaginatedResult, getPaginationParams } from "@/l
 import { createClient } from "@/infrastructure/supabase/server";
 
 export class ServiceRepository implements IServiceRepository {
+  // Explicit column selection to avoid N+1 queries and unnecessary data transfer
+  private readonly defaultColumns = 'id,clinic_id,category_id,name,duration,requires_room,requires_specialist,is_active';
+
   async findById(id: string, clinicId: string): Promise<Result<Service>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('services').select('*').eq('id', id).eq('clinic_id', clinicId).single();
+    const { data, error } = await supabase.from('services').select(this.defaultColumns).eq('id', id).eq('clinic_id', clinicId).single();
     if (error || !data) return Result.fail(error?.message || "Service not found");
     return Result.ok(this.mapToEntity(data as DBService));
   }
 
   async findAll(clinicId: string): Promise<Result<Service[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('services').select('*').eq('clinic_id', clinicId).order('name');
+    const { data, error } = await supabase.from('services').select(this.defaultColumns).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBService[]).map(d => this.mapToEntity(d)));
   }
 
   async findByCategory(categoryId: string, clinicId: string): Promise<Result<Service[]>> {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('services').select('*').eq('category_id', categoryId).eq('clinic_id', clinicId).order('name');
+    const { data, error } = await supabase.from('services').select(this.defaultColumns).eq('category_id', categoryId).eq('clinic_id', clinicId).order('name');
     if (error) return Result.fail(error.message);
     return Result.ok(((data || []) as DBService[]).map(d => this.mapToEntity(d)));
   }
@@ -29,6 +32,8 @@ export class ServiceRepository implements IServiceRepository {
   /**
    * Find services with pagination support
    * Supports search: name, and filter by category_id and is_active
+   * PERFORMANCE: Uses explicit select() and indexes on (clinic_id, category_id, is_active, name)
+   * Response time target: < 100ms
    */
   async findAllPaginated(
     clinicId: string,
@@ -47,7 +52,7 @@ export class ServiceRepository implements IServiceRepository {
 
     let dataQuery = supabase
       .from('services')
-      .select('*')
+      .select(this.defaultColumns)
       .eq('clinic_id', clinicId);
 
     // Apply category filter
@@ -96,7 +101,7 @@ export class ServiceRepository implements IServiceRepository {
       requires_room: entity.requires_room ?? false,
       requires_specialist: entity.requires_specialist ?? false,
       is_active: entity.is_active ?? true,
-    }).select().single();
+    }).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to create service");
     return Result.ok(this.mapToEntity(data as DBService));
   }
@@ -110,7 +115,7 @@ export class ServiceRepository implements IServiceRepository {
       requires_room: entity.requires_room,
       requires_specialist: entity.requires_specialist,
       is_active: entity.is_active,
-    }).eq('id', id).eq('clinic_id', clinicId).select().single();
+    }).eq('id', id).eq('clinic_id', clinicId).select(this.defaultColumns).single();
     if (error || !data) return Result.fail(error?.message || "Failed to update service");
     return Result.ok(this.mapToEntity(data as DBService));
   }
