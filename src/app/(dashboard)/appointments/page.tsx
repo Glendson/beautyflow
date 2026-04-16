@@ -7,6 +7,7 @@ import { AppointmentModal, AppointmentFormData, DeleteConfirmationModal } from "
 import { listAppointmentsAction, createAppointmentAction, deleteAppointmentAction } from "@/app/(auth)/actions";
 import { Appointment } from "@/domain/appointment/Appointment";
 import { PaginatedResult } from "@/lib/pagination";
+import { logger } from "@/lib/logger";
 
 const statusConfig = {
   scheduled: { label: "Agendado", color: "primary" },
@@ -50,7 +51,7 @@ export default function AppointmentsPage() {
         setCurrentPage(page);
       }
     } catch (error) {
-      console.error("Erro ao buscar agendamentos:", error);
+      logger.error("Erro ao buscar agendamentos:", error);
     } finally {
       setIsLoading(false);
     }

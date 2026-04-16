@@ -16,8 +16,8 @@ export class AuthUseCase {
     logger.debug("SignUp - Step 1: Creating user");
     
     // Try admin signup first (bypasses email validation if SERVICE_ROLE_KEY available)
-    let authData: any;
-    let authError: any;
+    let authData: { user?: { id: string } } | undefined;
+    let authError: { message?: string } | null;
     
     logger.debug("SignUp - Attempting admin signup");
     const adminResult = await signUpWithBypass(email, password, {
@@ -36,11 +36,11 @@ export class AuthUseCase {
         password,
       });
       
-      authData = signupResult.data;
+      authData = signupResult.data as typeof authData;
       authError = signupResult.error;
     }
 
-    if (authError || !authData.user) {
+    if (authError || !authData?.user) {
       logger.error("User creation failed", authError);
       return Result.fail(authError?.message || "Failed to create user");
     }

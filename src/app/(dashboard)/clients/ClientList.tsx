@@ -6,20 +6,35 @@ import { createClientAction, deleteClientAction } from "./actions";
 import { useToast } from "@/components/ui/Toast";
 
 export default function ClientList({ initialClients }: { initialClients: Client[] }) {
+  const toast = useToast();
   const [clients, setClients] = useState(initialClients);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this client?")) return;
+  const handleDeleteClick = (id: string) => {
+    if (confirmingId === id) {
+      performDelete(id);
+    } else {
+      setConfirmingId(id);
+    }
+  };
+
+  const performDelete = async (id: string) => {
     setLoadingId(id);
     const res = await deleteClientAction(id);
     if (res.success) {
       setClients((prev) => prev.filter((c) => c.id !== id));
+      toast.showToast("Client removed successfully", "success");
     } else {
-      alert("Failed to delete client");
+      toast.showToast("Failed to delete client", "error");
     }
     setLoadingId(null);
+    setConfirmingId(null);
+  };
+
+  const cancelDelete = () => {
+    setConfirmingId(null);
   };
 
   return (
@@ -107,10 +122,21 @@ export default function ClientList({ initialClients }: { initialClients: Client[
                   <td className="font-medium text-gray-900">{c.name}</td>
                   <td>{c.email || <span className="text-gray-300">—</span>}</td>
                   <td>{c.phone || <span className="text-gray-300">—</span>}</td>
-                  <td className="text-right">
-                    <button onClick={() => handleDelete(c.id)} disabled={loadingId === c.id} className="btn-danger-ghost">
-                      {loadingId === c.id ? "Deleting..." : "Delete"}
-                    </button>
+                  <td className="text-right space-x-2">
+                    {confirmingId === c.id ? (
+                      <>
+                        <button onClick={() => performDelete(c.id)} disabled={loadingId === c.id} className="btn-danger">
+                          {loadingId === c.id ? "Deleting..." : "Confirm"}
+                        </button>
+                        <button onClick={cancelDelete} disabled={loadingId === c.id} className="btn-secondary">
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleDeleteClick(c.id)} disabled={loadingId === c.id} className="btn-danger-ghost">
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

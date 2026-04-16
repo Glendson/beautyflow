@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Avatar, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
-import { EmployeeModal, EmployeeFormData, DeleteConfirmationModal } from "@/components/modals";
+import { Plus, Search, Edit, Trash2 } from "lucide-react";import { logger } from "@/lib/logger";import { EmployeeModal, EmployeeFormData, DeleteConfirmationModal } from "@/components/modals";
 import { listEmployeesAction, createEmployeeAction, deleteEmployeeAction } from "@/app/(auth)/actions";
 import { Employee } from "@/domain/employee/Employee";
 import { PaginatedResult } from "@/lib/pagination";
@@ -37,7 +36,7 @@ export default function EmployeesPage() {
         setCurrentPage(page);
       }
     } catch (error) {
-      console.error("Erro ao buscar profissionais:", error);
+      logger.error("Erro ao buscar profissionais:", error);
     } finally {
       setIsLoading(false);
     }

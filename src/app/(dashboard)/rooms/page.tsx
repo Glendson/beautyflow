@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
-import { Plus, Search, Edit, Trash2, MapPin } from "lucide-react";import { logger } from "@/lib/logger";import { RoomModal, RoomFormData, DeleteConfirmationModal } from "@/components/modals";
+import { Plus, Search, Edit, Trash2, MapPin } from "lucide-react";
+import { logger } from "@/lib/logger";
+import { RoomModal, RoomFormData, DeleteConfirmationModal } from "@/components/modals";
 import { listRoomsAction, createRoomAction, updateRoomAction, deleteRoomAction } from "@/app/(auth)/actions";
 import { Room } from "@/domain/room/Room";
 import { PaginatedResult } from "@/lib/pagination";
@@ -36,7 +38,7 @@ export default function RoomsPage() {
         setCurrentPage(page);
       }
     } catch (error) {
-      console.error("Erro ao buscar ambientes:", error);
+      logger.error("Erro ao buscar ambientes:", error);
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +83,7 @@ export default function RoomsPage() {
         }
       }
     } catch (error) {
-      console.error("Erro ao salvar ambiente:", error);
+      logger.error("Erro ao salvar ambiente:", error);
     } finally {
       setIsSubmitting(false);
     }

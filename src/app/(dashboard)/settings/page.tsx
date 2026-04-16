@@ -56,7 +56,7 @@ export default function SettingsPage() {
         name: clinicName,
       };
 
-      console.log("💾 [SETTINGS] Saving clinic changes:", updateData);
+      logger.debug("[SETTINGS] Saving clinic changes:", updateData);
       const result = await updateClinicAction(updateData);
 
       if (result.success) {

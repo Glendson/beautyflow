@@ -15,10 +15,17 @@ const eslintConfig = defineConfig([
   ]),
   // Strict rules for production code
   {
-    files: ["**/src/**", "!**/src/tests/**", "!**/e2e/**"],
+    files: ["**/src/**", "!**/src/tests/**", "!**/e2e/**", "!**/src/lib/logger.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "no-console": "error",
+    },
+  },
+  // Allow console in logger utility
+  {
+    files: ["**/src/lib/logger.ts"],
+    rules: {
+      "no-console": "off",
     },
   },
   // Allow looser rules in test files and mocks to speed development

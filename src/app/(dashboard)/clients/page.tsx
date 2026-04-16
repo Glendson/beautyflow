@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Button, Input, Avatar, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
+import { Card, Button, Input, Avatar, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
 import { Plus, Search, Phone, Mail, Edit, Trash2 } from "lucide-react";
 import { logger } from "@/lib/logger";
 import { ClientModal, ClientFormData, DeleteConfirmationModal } from "@/components/modals";
 import { listClientsAction, createClientAction, deleteClientAction } from "@/app/(auth)/actions";
 import { Client } from "@/domain/client/Client";
 import { PaginatedResult } from "@/lib/pagination";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ClientsPage() {
   // State
@@ -42,7 +43,7 @@ export default function ClientsPage() {
         setCurrentPage(page);
       }
     } catch (error) {
-      console.error("Erro ao buscar clientes:", error);
+      logger.error("Erro ao buscar clientes:", error);
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +52,7 @@ export default function ClientsPage() {
   // Initial load
   useEffect(() => {
     fetchClients(1);
-  }, [searchTerm]);
+  }, [searchTerm, fetchClients]);
 
   // Handle create client
   const handleCreateClient = () => {

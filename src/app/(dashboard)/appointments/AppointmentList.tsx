@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/components/ui/Toast";
 import { Appointment } from "@/domain/appointment/Appointment";
 import { Client } from "@/domain/client/Client";
 import { Service } from "@/domain/service/Service";
@@ -83,7 +84,7 @@ export default function AppointmentList({
           <form
             action={async (formData) => {
               const res = await createAppointmentAction(formData);
-              if (res.success && res.data) {
+              if (res.success) {
                 setAppointments(
                   [...appointments, res.data].sort(
                     (a, b) =>

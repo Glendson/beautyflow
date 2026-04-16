@@ -51,7 +51,10 @@ export const ServiceService = {
     price: number;
     is_active?: boolean;
   }): Promise<Result<Service>> {
-    return ServiceUseCases.createService(data);
+    return ServiceUseCases.createService({
+      ...data,
+      is_active: data.is_active ?? true,
+    });
   },
 
   /**

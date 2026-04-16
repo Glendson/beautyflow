@@ -10,9 +10,17 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
   const [services, setServices] = useState(initialServices);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this service?")) return;
+  const handleDeleteClick = (id: string) => {
+    if (confirmingId === id) {
+      performDelete(id);
+    } else {
+      setConfirmingId(id);
+    }
+  };
+
+  const performDelete = async (id: string) => {
     setLoadingId(id);
     const res = await deleteServiceAction(id);
     if (res.success) {
@@ -22,6 +30,11 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
       toast.showToast("Failed to delete service", "error");
     }
     setLoadingId(null);
+    setConfirmingId(null);
+  };
+
+  const cancelDelete = () => {
+    setConfirmingId(null);
   };
 
   return (
@@ -119,10 +132,21 @@ export default function ServiceList({ initialServices }: { initialServices: Serv
                       <span className="badge badge-gray">No</span>
                     )}
                   </td>
-                  <td className="text-right">
-                    <button onClick={() => handleDelete(s.id)} disabled={loadingId === s.id} className="btn-danger-ghost">
-                      {loadingId === s.id ? "Deleting..." : "Delete"}
-                    </button>
+                  <td className="text-right space-x-2">
+                    {confirmingId === s.id ? (
+                      <>
+                        <button onClick={() => performDelete(s.id)} disabled={loadingId === s.id} className="btn-danger">
+                          {loadingId === s.id ? "Deleting..." : "Confirm"}
+                        </button>
+                        <button onClick={cancelDelete} disabled={loadingId === s.id} className="btn-secondary">
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleDeleteClick(s.id)} disabled={loadingId === s.id} className="btn-danger-ghost">
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

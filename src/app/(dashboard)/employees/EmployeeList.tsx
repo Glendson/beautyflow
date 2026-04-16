@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Employee } from "@/domain/employee/Employee";
 import { Service } from "@/domain/service/Service";
 import { createEmployeeAction, deleteEmployeeAction } from "./actions";
+import { useToast } from "@/components/ui/Toast";
 
 export default function EmployeeList({
   initialEmployees,
@@ -12,17 +13,35 @@ export default function EmployeeList({
   initialEmployees: Employee[];
   availableServices: Service[];
 }) {
+  const toast = useToast();
   const [employees, setEmployees] = useState(initialEmployees);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this employee?")) return;
+  const handleDeleteClick = (id: string) => {
+    if (confirmingId === id) {
+      performDelete(id);
+    } else {
+      setConfirmingId(id);
+    }
+  };
+
+  const performDelete = async (id: string) => {
     setLoadingId(id);
     const res = await deleteEmployeeAction(id);
-    if (res.success) setEmployees((prev) => prev.filter((e) => e.id !== id));
-    else alert("Failed to delete employee");
+    if (res.success) {
+      setEmployees((prev) => prev.filter((e) => e.id !== id));
+      toast.showToast("Employee removed successfully", "success");
+    } else {
+      toast.showToast("Failed to delete employee", "error");
+    }
     setLoadingId(null);
+    setConfirmingId(null);
+  };
+
+  const cancelDelete = () => {
+    setConfirmingId(null);
   };
 
   return (
@@ -120,10 +139,21 @@ export default function EmployeeList({
                       <span className="font-medium text-gray-900">{e.name}</span>
                     </div>
                   </td>
-                  <td className="text-right">
-                    <button onClick={() => handleDelete(e.id)} disabled={loadingId === e.id} className="btn-danger-ghost">
-                      {loadingId === e.id ? "Deleting..." : "Delete"}
-                    </button>
+                  <td className="text-right space-x-2">
+                    {confirmingId === e.id ? (
+                      <>
+                        <button onClick={() => performDelete(e.id)} disabled={loadingId === e.id} className="btn-danger">
+                          {loadingId === e.id ? "Deleting..." : "Confirm"}
+                        </button>
+                        <button onClick={cancelDelete} disabled={loadingId === e.id} className="btn-secondary">
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleDeleteClick(e.id)} disabled={loadingId === e.id} className="btn-danger-ghost">
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

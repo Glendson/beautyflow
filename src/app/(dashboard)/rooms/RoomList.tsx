@@ -10,9 +10,17 @@ export default function RoomList({ initialRooms }: { initialRooms: Room[] }) {
   const [rooms, setRooms] = useState(initialRooms);
   const [showAdd, setShowAdd] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this room?")) return;
+  const handleDeleteClick = (id: string) => {
+    if (confirmingId === id) {
+      performDelete(id);
+    } else {
+      setConfirmingId(id);
+    }
+  };
+
+  const performDelete = async (id: string) => {
     setLoadingId(id);
     const res = await deleteRoomAction(id);
     if (res.success) {
@@ -22,6 +30,11 @@ export default function RoomList({ initialRooms }: { initialRooms: Room[] }) {
       toast.showToast("Failed to delete room", "error");
     }
     setLoadingId(null);
+    setConfirmingId(null);
+  };
+
+  const cancelDelete = () => {
+    setConfirmingId(null);
   };
 
   return (
@@ -118,10 +131,21 @@ export default function RoomList({ initialRooms }: { initialRooms: Room[] }) {
                       </span>
                     )}
                   </td>
-                  <td className="text-right">
-                    <button onClick={() => handleDelete(r.id)} disabled={loadingId === r.id} className="btn-danger-ghost">
-                      {loadingId === r.id ? "Deleting..." : "Delete"}
-                    </button>
+                  <td className="text-right space-x-2">
+                    {confirmingId === r.id ? (
+                      <>
+                        <button onClick={() => performDelete(r.id)} disabled={loadingId === r.id} className="btn-danger">
+                          {loadingId === r.id ? "Deleting..." : "Confirm"}
+                        </button>
+                        <button onClick={cancelDelete} disabled={loadingId === r.id} className="btn-secondary">
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleDeleteClick(r.id)} disabled={loadingId === r.id} className="btn-danger-ghost">
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -1,5 +1,11 @@
 'use server';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'Erro ao processar solicitação';
+}
+
 import { createClient } from '@/infrastructure/supabase/server';
 import { PublicBookingService } from '@/lib/services/public-booking.service';
 
@@ -46,7 +52,7 @@ export async function getClinicDataAction(clinicSlug: string) {
       data: { clinic, services, employees },
     };
   } catch (error) {
-    return { success: false, error: String(error) };
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 
@@ -76,7 +82,7 @@ export async function getAvailableSlotsAction(
 
     return { success: true, data: result.data || [] };
   } catch (error) {
-    return { success: false, error: String(error) };
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 
@@ -185,7 +191,7 @@ export async function createBookingAction(data: BookingData) {
       },
     };
   } catch (error) {
-    return { success: false, error: String(error) };
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 

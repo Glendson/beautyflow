@@ -1,9 +1,11 @@
 "use server";
 
 import { AppointmentService, ServiceService } from "@/lib/services";
+import { Result } from "@/lib/result";
+import { Appointment } from "@/domain/appointment/Appointment";
 import { revalidatePath } from "next/cache";
 
-export async function createAppointmentAction(formData: FormData) {
+export async function createAppointmentAction(formData: FormData): Promise<Result<Appointment>> {
   const client_id = formData.get("client_id")?.toString();
   const service_id = formData.get("service_id")?.toString();
   const employee_id = formData.get("employee_id")?.toString();

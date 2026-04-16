@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeader, Pagination } from "@/components/ui";
-import { Plus, Search, DollarSign, Edit, Trash2 } from "lucide-react";import { logger } from "@/lib/logger";import { ServiceModal, ServiceFormData, DeleteConfirmationModal } from "@/components/modals";
+import { Plus, Search, DollarSign, Edit, Trash2 } from "lucide-react";
+import { logger } from "@/lib/logger";
+import { ServiceModal, ServiceFormData, DeleteConfirmationModal } from "@/components/modals";
 import { listServicesAction, createServiceAction, deleteServiceAction } from "@/app/(auth)/actions";
 import { Service } from "@/domain/service/Service";
 import { PaginatedResult } from "@/lib/pagination";
@@ -37,7 +39,7 @@ export default function ServicesPage() {
         setCurrentPage(page);
       }
     } catch (error) {
-      console.error("Erro ao buscar serviços:", error);
+      logger.error("Erro ao buscar serviços:", error);
     } finally {
       setIsLoading(false);
     }
